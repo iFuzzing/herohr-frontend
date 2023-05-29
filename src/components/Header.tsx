@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import ImageGGprofile from '../assets/images/mix/gg_profile.png'
 import ImageUxNavIndicator from '../assets/images/mix/ux-nav-Indicator.svg'
@@ -20,10 +19,10 @@ export default function Header(){
             <h1 className="text-center uppercase text-2xl">HERO HR</h1>
             <nav className="overflow-hidden shadow-lg shadow-black/25 bg-white text-label-primary p-3 rounded-md flex flex-row items-center justify-center">
                 <ul className='flex flex-row gap-2 s320:gap-7  text-xs uppercase font-Roboto font-medium items-center'>
-                    <NavLink to='.' className={({isActive})=>isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':null}><li>Empresas</li></NavLink>
-                    <NavLink to='jobs' className={({isActive})=>isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':null}><li>Vagas</li></NavLink>
-                    <NavLink to='steps' className={({isActive})=>isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':null}><li>Etapas</li></NavLink>
-                    <NavLink to='applicants' className={({isActive})=>isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':null}><li>Candidatos</li></NavLink>
+                    <NavLink to='.' className={isActive=>(isActive.isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':'')}><li>Empresas</li></NavLink>
+                    <NavLink to='jobs' className={isActive=>(isActive.isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':'')}><li>Vagas</li></NavLink>
+                    <NavLink to='steps' className={isActive=>(isActive.isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':'')}><li>Etapas</li></NavLink>
+                    <NavLink to='applicants' className={isActive=>(isActive.isActive?'bg-app-base-primary text-white p-2 rounded-full shadow-md shadow-black/30':'')}><li>Candidatos</li></NavLink>
                 </ul>
             </nav>
         </header>

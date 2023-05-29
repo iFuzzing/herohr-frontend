@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import {useState} from 'react'
 import { Form, Link } from 'react-router-dom'
 import ContentPage from '../components/ContentPage'
 import ImageUber from '../assets/images/companies/Uber.png'
@@ -20,7 +20,7 @@ export default function CompaniesPage(){
                     <label className='text-sm' htmlFor="company_name">Nome</label>
                     <input className='w-11/12 p-2 rounded-full border-[1px] shadow-md shadow-black/20 text-center sm:text-left sm:rounded-md sm:w-full' type="text" name="company_name" id="company_name" placeholder='Nome da empresa...'/>
                     <label className='text-sm' htmlFor="decription">Descrição</label>
-                    <textarea className='resize-none p-1 s320:p-4 border-[1px] border-black/20 rounded-md shadow-md shadow-black/20 sm:rounded-md' name="decription" id="decription" cols="30" rows="5" maxLength='100' placeholder='...'></textarea>
+                    <textarea className='resize-none p-1 s320:p-4 border-[1px] border-black/20 rounded-md shadow-md shadow-black/20 sm:rounded-md' name="decription" id="decription" cols={30} rows={5} maxLength={100} placeholder='...'></textarea>
                     <span className="text-[10px] self-center">Max: 100 caracteres</span>
                     <button className="w-44 mt-5 self-center sm:self-auto font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Adicionar</button>
                 </Form>

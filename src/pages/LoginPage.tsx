@@ -1,4 +1,3 @@
-import React from 'react'
 import {Link} from 'react-router-dom'
 
 import ImageBgSky from '../assets/images/login/bg-sky-login-SE.png'
@@ -10,9 +9,8 @@ import ImageUxSingUpIndicator from '../assets/images/login/SingupUxIndicator.svg
 import { Form } from 'react-router-dom'
 
 export default function LoginPage(){
-    
     return(
-    <main style={{'--image-url': `url(${ImageBgSky})`}} className='bg-slate-200 w-screen h-screen bg-[image:var(--image-url)] bg-cover overflow-hidden sm:bg-none sm:flex sm:items-center'>
+    <main style={{'--image-url': `url(${ImageBgSky})`} as React.CSSProperties} className='bg-slate-200 w-screen h-screen bg-[image:var(--image-url)] bg-cover overflow-hidden sm:bg-none sm:flex sm:items-center'>
         <div className='sm:bg-white max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
             <div className="sm:w-1/2 sm:relative sm:bg-gradient-to-b sm:from-active-primary sm:h-full sm:justify-around sm:flex sm:flex-col">
                 <div className="relative sm:w-full w-screen h-[290px] flex flex-wrap justify-center py-7">
@@ -48,7 +46,7 @@ export default function LoginPage(){
                     <img src={ImageUxSingUpIndicator} alt="" className="hidden tall:block sm:hidden absolute w-48 bottom-10 right-0" />
                     <button className='absolute bottom-0 right-0 cursor-default sm:hidden'>
                         <Link className="cursor-pointer w-10 h-12 rotate-45 absolute right-3 bottom-3" to='/singup'></Link>
-                        <img src={ImageFlipSingUp} alt="" srcset="" />
+                        <img src={ImageFlipSingUp} alt="" />
                     </button>
                     <span className="hidden sm:block font-medium self-center text-xs text-label-primary font-Roboto">Não tem uma conta? <Link className='underline text-link-primary' to='/singup'>Registrar</Link></span>
                 </section>

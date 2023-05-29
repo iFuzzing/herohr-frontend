@@ -1,4 +1,3 @@
-import React from 'react'
 import ContentPage from '../components/ContentPage'
 import {Link} from 'react-router-dom'
 import ImageUber from '../assets/images/companies/Uber.png'

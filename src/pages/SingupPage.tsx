@@ -1,4 +1,3 @@
-import React from 'react'
 import { Form, Link } from 'react-router-dom'
 import ImageFlipLogin from '../assets/images/login/flipToLogin.svg'
 import ImageHeroSingup from '../assets/images/singup/bg-hero-singup-SE.svg'

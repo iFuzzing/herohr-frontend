@@ -1,13 +1,18 @@
-import React from 'react'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
 
+interface Props{
+    toggleForm: ()=>void;
+    hasImgOnForm: boolean;
+    title: string;
+    formContent: any;
+}
 
-export default function FormContentPage(props){
+export default function FormContentPage(props:Props){
     return (
         <>
             <div className="fixed w-screen h-screen bg-black/70 top-0 left-0 right-0 bottom-0 m-auto ">
                 <div className="absolute w-[95%] max-w-3xl overflow-auto h-fit rounded-md p-4 text-center top-0 left-0 right-0 bottom-0 m-auto bg-white shadow-md shadow-black/30 font-Kanit text-app-base-primary">
-                    <span onClick={props.toggleForm} class="cursor-pointer material-symbols-outlined absolute left-0 top-0 p-1 m-2 text-white bg-black/20 rounded-full">close</span>
+                    <span onClick={props.toggleForm} className="cursor-pointer material-symbols-outlined absolute left-0 top-0 p-1 m-2 text-white bg-black/20 rounded-full">close</span>
                     <h1 className='font-bold text-2xl '>HERO HR</h1>
                     <hr />
                     <h3 className='uppcase font-normal uppercase'>{props.title}</h3>

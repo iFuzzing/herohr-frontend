@@ -1,6 +1,12 @@
-import React from 'react'
 
-export default function ContentPage(props){
+interface Props{
+    title?:string;
+    content: any;
+    isFormVisible?: boolean;
+    addAction?: ()=>void;
+}
+
+export default function ContentPage(props:Props){
     return(
         <main className="sm:flex sm:flex-col">
             {props?.title &&
