@@ -22,7 +22,8 @@ export default {
       },
       screens: {
         'tall': { 'raw': '(min-height: 764px) and (max-width: 640px)' },
-        's320': {'raw': '(min-width: 320)'},
+        's320': {'raw': '(min-width: 320px) and (max-width: 400px)'},
+        's400': {'raw': '(min-width: 400px) and (max-width: 700px)'},
       }
     },
   },

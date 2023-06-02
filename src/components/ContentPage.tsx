@@ -1,4 +1,3 @@
-
 interface Props{
     title?:string;
     content: any;
@@ -24,12 +23,17 @@ export default function ContentPage(props:Props){
             </>
             }
             <section className="p-5 sm:bg-white self-center sm:m-[5%] sm:w-[80%] sm:max-w-[900px sm:border-[1px] sm:border-gray-300 sm:rounded-lg">
+                    { !props.isFormVisible &&
+                        <button onClick={props.addAction} className="hidden sm:block float-right text-sm bg-app-base-primary rounded-sm text-white font-Roboto font-medium  p-2 max-w-[100px] shadow-md shadow-black/20">Adicionar</button>
+                    }
+
                 {props?.title && 
                 <>
-                <span className='hidden sm:block font-Roboto font-medium text-label-primary'>{props.title}</span>
+                <span className='hidden sm:block font-Roboto font-medium text-label-primary'>{props.title}</span>   
                 <div className='hidden sm:block relative mb-10'>
-                    <input className='font-Roboto hidden p-1 pl-[8%] md:pl-[6%] sm:block absolute max-w-[300px] rounded-sm w-full border-[1px] border-black/10' type="text" name="searchbar" id="" placeholder='Nome...' />
+                    <input className='font-Roboto hidden p-1 pl-[8%] md:pl-[6%] sm:block absolute sm:max-w-[200px] md:max-w-[300px] rounded-sm w-full border-[1px] border-black/10' type="text" name="searchbar" id="" placeholder='Nome...' />
                     <span className="material-symbols-outlined absolute left-[1%] text-2xl text-[#B4B4B4]">search</span>
+                    
                 </div>
                 </>      
                 }

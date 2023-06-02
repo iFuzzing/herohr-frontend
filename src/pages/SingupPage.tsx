@@ -24,21 +24,21 @@ export default function SingupPage(){
                         <label className='ml-3' htmlFor="email">E-mail:</label>
                         <div className="relative">
                             <i className="fa fa-envelope absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="email" name="email" id="email" autoFocus/>
+                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" autoFocus/>
                         </div>
                         <label className='ml-3 mt-3' htmlFor="pass">Senha:</label>
                         <div className="relative">
                             <i className="fa fa-lock  absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="password" name="pass" id="pass" />
+                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="pass" id="pass" />
                         </div>
                         <div className='flex flex-nowrap py-2 gap-3 mx-auto'>
                             <div className="flex flex-col">
                                 <label className='ml-3' htmlFor="email">Primeiro nome</label>
-                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="email" name="email" id="email" />
+                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" />
                             </div>
                             <div className="flex flex-col">
                                 <label className='ml-3' htmlFor="email">Segundo nome</label>
-                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="email" name="email" id="email" />
+                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" />
                             </div>                        </div>
                         <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Registrar <i className="fa fa-user-plus text-sm text-white/95" aria-hidden="true"></i></button>
                     </Form>

@@ -30,12 +30,12 @@ export default function LoginPage(){
                         <label className='ml-3 sm:' htmlFor="email">E-mail:</label>
                         <div className="relative">
                             <i className="fa fa-envelope absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="email" name="email" id="email" autoFocus />
+                            <input className='focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" autoFocus />
                         </div>
                         <label className='ml-3 mt-3' htmlFor="pass">Senha:</label>
                         <div className="relative">
                             <i className="fa fa-lock  absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='focus:outline-active-primary rounded-3xl shadow-lg shadow-black/30 h-10 w-full px-10' type="password" name="pass" id="pass" />
+                            <input className='focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="pass" id="pass" />
                         </div>
                         <div className='flex flex-nowrap py-2'>
                             <input className='ml-2' type="checkbox" name="keepsession" id="keepsession" />

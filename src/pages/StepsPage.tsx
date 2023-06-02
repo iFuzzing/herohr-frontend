@@ -1,14 +1,38 @@
 import ContentPage from '../components/ContentPage'
-import {Link} from 'react-router-dom'
+import FormContentPage from '../components/FormContentPage'
+import {Link, Form} from 'react-router-dom'
+import {useState} from 'react'
 import ImageUber from '../assets/images/companies/Uber.png'
 import ImageProfile1 from '../assets/images/steps/profile (1).png'
 import ImageProfile2 from '../assets/images/steps/profile (2).png'
 import ImageProfile3 from '../assets/images/steps/profile (3).png'
 
-
 export default function StepsPage(){
-    const content =  
-    <ul className="flex flex-col sm:w-full sm:block">
+    
+    const [isFormVisible, setIsFormVisible] = useState(false)
+
+    function toggleForm(){
+        setIsFormVisible((prevIsFormVisible)=> !prevIsFormVisible)
+    }
+
+    const formContent = 
+                <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary' method='post'>
+                <div className='flex flex-col text-center w-full font-Roboto font-semibold text-title-primary'>
+                    <span className="material-symbols-outlined">flag</span>
+                    <h1 className='uppercase'># Etapa 1 </h1>
+                </div>
+                <label className='text-sm' htmlFor="decription">Descrição</label>
+                <textarea className='w-full resize-none p-1 s320:p-4 border-[1px] border-black/20 rounded-md shadow-md shadow-black/20 sm:rounded-md' name="decription" id="decription" cols={30} rows={5} maxLength={100} placeholder='...'></textarea>
+                    <span className="text-[10px] self-center">Max: 50 caracteres</span>
+                    <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Adicionar</button>
+                </Form>
+
+    const content =
+    <>
+    {isFormVisible && 
+        <FormContentPage title={'Cadastrar nova etapa'} toggleForm={toggleForm} hasImgOnForm={false} formContent={formContent}/>
+    }
+    <ul className="flex flex-col sm:w-full sm:block sm:mt-10">
     <Link to='#'>
         <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block">
             <div className="relative w-full h-44 bg-[#D9D9D9] rounded-lg border-[1px] border-label-primary/10 duration-200 hover:border-active-primary">
@@ -57,6 +81,7 @@ export default function StepsPage(){
         </li>
     </Link>
 </ul>
+</>
 
-    return(<ContentPage content={content} />)
+    return(<ContentPage content={content} addAction={toggleForm} isFormVisible={isFormVisible} />)
 }

@@ -51,7 +51,7 @@ export default function Header(){
                         <NavLink to='applicants' onClick={(event)=>{event.preventDefault()}} className={({isActive})=>{return 'cursor-not-allowed text-white/50 before:text-white/50 duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary':'')}}><li className=""><span className="material-symbols-outlined mr-2 float-left">group</span>Candidatos</li></NavLink>                        
                     </ul>
                 </nav>
-                <Link to='/logout' className=' duration-300 text-gray-800 hover:text-white'><span className="material-symbols-outlined float-left">logout</span>Sair</Link>
+                    <Link to='/logout' className='duration-300 text-white hover:text-gray-800'><span className="material-symbols-outlined float-left">logout</span>Sair</Link>
                 
             </div>
         </aside>
