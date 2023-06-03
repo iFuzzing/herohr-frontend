@@ -1,7 +1,9 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ContentPage from '../components/ContentPage'
 import FormContentPage from '../components/FormContentPage'
 import {useState} from 'react'
 import { Link, Form } from 'react-router-dom'
+import { faBriefcase, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export default function JobsPage(){
     const [isFormVisible, setIsFormVisible] = useState(false)
@@ -25,12 +27,12 @@ export default function JobsPage(){
     const content =
     <>
     { isFormVisible &&
-    <FormContentPage title={'Cadastrar nova vaga'} toggleForm={toggleForm} hasImgOnForm={false} formContent={formContent}/>
+    <FormContentPage title={'Cadastrar nova vaga'} toggleForm={toggleForm} formContent={formContent}/>
     }
     <ul className="flex flex-col sm:w-full sm:block">
         <Link to='#'>
             <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block">
-                <span className="material-symbols-outlined float-left text-2xl">work</span>
+                <FontAwesomeIcon className='float-left text-2xl bg-gray-200 p-4 rounded-full' icon={faBriefcase} />
                 <div className="flex flex-row">
                     <div className="w-full flex flex-col ml-3 font-Roboto">
                         <h3 className="font-medium">Desenvolvedor(a) Front-end (React) Pleno</h3>
@@ -39,8 +41,12 @@ export default function JobsPage(){
     Fornecer a tecnologia para uma plataforma que facilite as solicitações mensais.</p>
                     </div>
                     <div className="flex flex-col justify-between">
-                        <Link to='#'><span className="material-symbols-outlined text-label-secondary">edit</span></Link>
-                        <Link to='#'><span className="material-symbols-outlined text-alert">delete_forever</span></Link>
+                        <Link to='/1'>
+                            <FontAwesomeIcon className='text-label-secondary' icon={faEdit} />
+                        </Link>
+                        <Link to='/2'>
+                            <FontAwesomeIcon className='text-alert' icon={faTrash} />
+                        </Link>
                     </div>
                 </div>
             </li>

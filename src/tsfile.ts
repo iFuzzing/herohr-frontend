@@ -1,1 +1,1 @@
-const working: boolean = true
+const isWorking: boolean = true

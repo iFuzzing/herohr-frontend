@@ -6,6 +6,8 @@ import ImageUber from '../assets/images/companies/Uber.png'
 import ImageProfile1 from '../assets/images/steps/profile (1).png'
 import ImageProfile2 from '../assets/images/steps/profile (2).png'
 import ImageProfile3 from '../assets/images/steps/profile (3).png'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFlag } from '@fortawesome/free-solid-svg-icons'
 
 export default function StepsPage(){
     
@@ -18,7 +20,7 @@ export default function StepsPage(){
     const formContent = 
                 <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary' method='post'>
                 <div className='flex flex-col text-center w-full font-Roboto font-semibold text-title-primary'>
-                    <span className="material-symbols-outlined">flag</span>
+                    <FontAwesomeIcon className='' icon={faFlag} />
                     <h1 className='uppercase'># Etapa 1 </h1>
                 </div>
                 <label className='text-sm' htmlFor="decription">Descrição</label>

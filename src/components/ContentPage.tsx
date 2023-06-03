@@ -1,3 +1,6 @@
+import { faAdd, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 interface Props{
     title?:string;
     content: any;
@@ -12,13 +15,12 @@ export default function ContentPage(props:Props){
             <>
             <div className="p-3 sm:hidden flex flex-row justify-between font-Roboto font-medium text-label-primary">
                 <span>{props.title}</span>
-                <span className="material-symbols-outlined">tune</span>
             </div>
              
             
             <div className='mt-2 sm:hidden w-full relative flex justify-center items-center'>
                 <input className='font-Roboto px-[8%] w-[93%] p-2 rounded-md absolute shadow-md shadow-gray-400/100' type="text" name="searchbar" id="" />
-                <span className="material-symbols-outlined absolute left-[5%] text-2xl text-[#B4B4B4]">search</span>
+                <FontAwesomeIcon className="absolute left-[5%] text-[#B4B4B4]" icon={faSearch} />
             </div>
             </>
             }
@@ -31,9 +33,8 @@ export default function ContentPage(props:Props){
                 <>
                 <span className='hidden sm:block font-Roboto font-medium text-label-primary'>{props.title}</span>   
                 <div className='hidden sm:block relative mb-10'>
-                    <input className='font-Roboto hidden p-1 pl-[8%] md:pl-[6%] sm:block absolute sm:max-w-[200px] md:max-w-[300px] rounded-sm w-full border-[1px] border-black/10' type="text" name="searchbar" id="" placeholder='Nome...' />
-                    <span className="material-symbols-outlined absolute left-[1%] text-2xl text-[#B4B4B4]">search</span>
-                    
+                            <input className='font-Roboto hidden p-1 pl-[8%] md:pl-[6%] lg:pl-[4%] sm:block absolute sm:max-w-[200px] md:max-w-[300px] rounded-sm w-full border-[1px] border-black/10' type="text" name="searchbar" id="" placeholder='Nome...' />
+                    <FontAwesomeIcon className="absolute left-[1%] text-2xl text-[#B4B4B4] sm:text-base sm:m-2" icon={faSearch} />
                 </div>
                 </>      
                 }
@@ -44,7 +45,7 @@ export default function ContentPage(props:Props){
             </section>
             { !props.isFormVisible && 
             <button onClick={props.addAction} className='sm:hidden fixed right-5 bottom-5 bg-app-base-primary p-3 text-white rounded-full flex items-center shadow-md shadow-black/50'>
-                <span className="material-symbols-outlined">add</span>
+                <FontAwesomeIcon icon={faAdd} />
             </button>
             } 
         </main>

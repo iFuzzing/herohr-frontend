@@ -7,6 +7,8 @@ import ImageApplicant3 from '../assets/images/applicants/applicant (3).png'
 import ImageApplicant4 from '../assets/images/applicants/applicant (4).png'
 //import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
 import FormContentPage from '../components/FormContentPage'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
 
 export default function ApplicantsPage(){
     
@@ -84,14 +86,14 @@ export default function ApplicantsPage(){
     const content = 
     <>
     { isFormVisible && 
-         <FormContentPage toggleForm={toggleForm} hasImgOnForm={true} formContent={formContent}/>
+         <FormContentPage toggleForm={toggleForm} formProfileImage={ImageApplicant1} formContent={formContent}/>
     }
  
-    <ul className="flex flex-col sm:w-full sm:block">
+    <ul className="flex flex-col flex-nowrap :w-full ">
         <button onClick={()=>toggleForm()}>
         <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block  hover:bg-active-primary/10">
             <img src={ImageApplicant1} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row">
+            <div className="flex flex-row  w-full sm:w-auto">
                 <div className="w-full flex flex-col ml-3 font-Roboto text-left">
                    <h3 className="font-medium">Angela Machado</h3>
                    <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
@@ -103,7 +105,9 @@ export default function ApplicantsPage(){
                    </div>
                 </div>
                 <div className="flex flex-col justify-between">
-                    <Link to='/1'><span className="material-symbols-outlined text-label-secondary/40" >visibility</span></Link>
+                    <Link to='/1'>
+                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
+                    </Link>
                 </div>
             </div>
         </li>
@@ -112,7 +116,7 @@ export default function ApplicantsPage(){
     <button>
         <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
             <img src={ImageApplicant2} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row">
+            <div className="flex flex-row  w-full sm:w-auto">
                 <div className="w-full flex flex-col ml-3 font-Roboto text-left">
                     <h3 className="font-medium">Counrtney Henry</h3>
                    <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
@@ -120,7 +124,9 @@ export default function ApplicantsPage(){
                    </div>
                 </div>
                 <div className="flex flex-col justify-between">
-                    <Link to='/1'><span className="material-symbols-outlined text-label-secondary/40" >visibility</span></Link>
+                    <Link to='/1'>
+                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
+                    </Link>
                 </div>
             </div>
         </li>
@@ -129,7 +135,7 @@ export default function ApplicantsPage(){
     <button>
         <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
             <img src={ImageApplicant3} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row">
+            <div className="flex flex-row  w-full sm:w-auto">
                 <div className="w-full flex flex-col ml-3 font-Roboto text-left">
                     <h3 className="font-medium">Darrel Steward</h3>
                     <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
@@ -141,7 +147,9 @@ export default function ApplicantsPage(){
                    </div>
                 </div>
                 <div className="flex flex-col justify-between">
-                    <Link to='/1'><span className="material-symbols-outlined text-label-secondary/40" >visibility</span></Link>
+                    <Link to='/1'>
+                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
+                    </Link>
                 </div>
             </div>
         </li>
@@ -150,7 +158,7 @@ export default function ApplicantsPage(){
     <button>
         <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
             <img src={ImageApplicant4} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row">
+            <div className="flex flex-row  w-full sm:w-auto">
                 <div className="w-full flex flex-col ml-3 font-Roboto text-left">
                     <h3 className="font-medium">Theresa Webb</h3>
                     <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
@@ -162,7 +170,9 @@ export default function ApplicantsPage(){
                    </div>
                 </div>
                 <div className="flex flex-col justify-between">
-                    <Link to='/1'><span className="material-symbols-outlined text-label-secondary/40" >visibility</span></Link>
+                    <Link to='/1'>
+                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
+                    </Link>
                 </div>
             </div>
         </li>

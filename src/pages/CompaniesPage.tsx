@@ -4,6 +4,8 @@ import ContentPage from '../components/ContentPage'
 import ImageUber from '../assets/images/companies/Uber.png'
 import FormContentPage from '../components/FormContentPage'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export default function CompaniesPage(){
 
@@ -15,7 +17,7 @@ export default function CompaniesPage(){
 
     const formContent = 
                 <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary' method='post'>
-                    <img className='sm:hidden w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 p-7 rounded-full' src={ImageFormPlaceHolder} alt="" placeholder=''/>
+                    <img className='sm:hidden w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ImageFormPlaceHolder} alt="" placeholder=''/>
                     <span className='sm:hidden text-[10px] text-label-primary/60' >Clique para adicionar/trocar imagem</span>
                     <label className='text-sm' htmlFor="company_name">Nome</label>
                     <input className='w-full p-2 rounded-full border-[1px] shadow-md shadow-black/20 text-center sm:text-left sm:rounded-md sm:w-full' type="text" name="company_name" id="company_name" placeholder='Nome da empresa...'/>
@@ -28,7 +30,7 @@ export default function CompaniesPage(){
     const content =
                 <>
                 { isFormVisible &&
-                <FormContentPage title={'Cadastrar nova empresa'} toggleForm={toggleForm} hasImgOnForm={true} formContent={formContent}/>
+                <FormContentPage title={'Cadastrar nova empresa'} toggleForm={toggleForm} formProfileImage={ImageFormPlaceHolder} formContent={formContent}/>
                 }
                 <ul className="flex flex-col sm:w-full sm:block">
                 <Link to='#'>
@@ -40,8 +42,12 @@ export default function CompaniesPage(){
                                 <p className="text-xs text-label-secondary">Multinacional americana, prestadora de serviços eletrônicos na área do transporte privado urbano</p>
                             </div>
                             <div className="flex flex-col justify-between">
-                                <Link to='/1'><span className="material-symbols-outlined text-label-secondary">edit</span></Link>
-                                <Link to='/2'><span className="material-symbols-outlined text-alert">delete_forever</span></Link>
+                                <Link to='/1'>
+                                    <FontAwesomeIcon className='text-label-secondary' icon={faEdit} />
+                                </Link>
+                                <Link to='/2'>
+                                    <FontAwesomeIcon className='text-alert' icon={faTrash} />
+                                </Link>
                             </div>
                         </div>
                     </li>
