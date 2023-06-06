@@ -1,9 +1,60 @@
-import { Form, Link } from 'react-router-dom'
+import { Form, Link, useActionData } from 'react-router-dom'
 import ImageFlipLogin from '../assets/images/login/flipToLogin.svg'
 import ImageHeroSingup from '../assets/images/singup/bg-hero-singup-SE.svg'
 import ImagemUxLoginIndicator from '../assets/images/singup/ux-singin-indicator.svg'
+import { isEmail, isPassword, isUsername } from '../utils/utils'
+
+export async function action({request}: { request: Request}){
+    const data = Object.fromEntries(await request.formData())
+   
+    const email: string = data.email as string
+    const password: string = data.password as string
+    const firstname:string = data.firstname as string
+    const lastname:string = data.lastname as string
+   
+    if(!email || !password || !firstname || !lastname){
+        return 'Todos os campos precisam ser preenchidos'
+    }
+
+    if(!isEmail(email) || email.length > 42){
+        return 'Email inválido'
+    }
+
+    if(!isPassword(password)){
+        return 'Sua senha deve conter de 8 a 32 caracteres com pelo menos 1 número e 1 caracter especial (!@#$%^&*])'
+    }
+
+    if(!isUsername(firstname)||!isUsername(lastname)){
+        return 'Preencha seu nome corretamente'
+    }
+
+    if(firstname.length > 32 || lastname.length > 32){
+        return 'Nome e sobrenome deve ter no máximo 32 caracteres'
+    }
+
+    const res = await fetch('http://localhost:3500/api/singup',
+        {
+            method: 'post',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                firstname: firstname,
+                lastname: lastname
+            })
+        }
+    )
+
+    const dataResponse = await res.json()
+    console.log(dataResponse)
+
+    return null 
+}
 
 export default function SingupPage(){
+    const actionReturn: string = useActionData() as string
     return(
         <main className='bg-slate-200 w-screen h-screen overflow-hidden sm:bg-none sm:flex sm:items-center'>
         <div className='sm:bg-white max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
@@ -29,20 +80,22 @@ export default function SingupPage(){
                         <label className='ml-3 mt-3' htmlFor="pass">Senha:</label>
                         <div className="relative">
                             <i className="fa fa-lock  absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="pass" id="pass" />
+                            <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="password" id="password" />
                         </div>
                         <div className='flex flex-nowrap py-2 gap-3 mx-auto'>
                             <div className="flex flex-col">
                                 <label className='ml-3' htmlFor="email">Primeiro nome</label>
-                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" />
+                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="text" name="firstname" id="firstanme" />
                             </div>
                             <div className="flex flex-col">
                                 <label className='ml-3' htmlFor="email">Segundo nome</label>
-                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" />
-                            </div>                        </div>
+                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="text" name="lastname" id="lastname" />
+                            </div>
+                        </div>
                         <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Registrar <i className="fa fa-user-plus text-sm text-white/95" aria-hidden="true"></i></button>
                     </Form>
                     <img src={ImagemUxLoginIndicator} alt="" className="hidden tall:block sm:hidden absolute w-40 bottom-10 right-0" />
+                    {actionReturn}
                     <button className='absolute bottom-0 right-0 cursor-default sm:hidden'>
                         <Link className="cursor-pointer w-10 h-12 rotate-45 absolute right-3 bottom-3" to='/login'></Link>
                         <img src={ImageFlipLogin} alt="" />
