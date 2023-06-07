@@ -1,3 +1,12 @@
+export const isRecruiterAuthenticated = async()=>{	
+	const res = await fetch('http://localhost:3500/api/recruiter/auth', {credentials: 'include'})
+	if(res.ok){
+		return true
+	}
+	
+	return false
+}
+
 /* Créditos para fazlulkarimweb https://github.com/fazlulkarimweb/string-sanitizer */
 export const isEmail = (email: string)=>{
 	const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;

@@ -1,4 +1,4 @@
-import {Link} from 'react-router-dom'
+import {Link, redirect, useActionData} from 'react-router-dom'
 
 import ImageBgSky from '../assets/images/login/bg-sky-login-SE.png'
 import ImageBlob from '../assets/images/login/bg-blob-login-SE.png'
@@ -7,8 +7,75 @@ import ImageHero from '../assets/images/login/bg-hero-login.png'
 import ImageFlipSingUp from '../assets/images/login/flipToSingup.svg'
 import ImageUxSingUpIndicator from '../assets/images/login/SingupUxIndicator.svg'
 import { Form } from 'react-router-dom'
+import { isEmail, isPassword, isRecruiterAuthenticated } from '../utils/utils'
+
+export async function loader(){
+    if(await isRecruiterAuthenticated()){
+       return redirect('/') 
+    }
+
+    return null
+}
+
+export async function action({request}:{request: Request}){
+    const data = Object.fromEntries(await request.formData())
+    const email: string = data.email as string
+    const password: string = data.password as string
+    //const keepSession: boolean = data?.keepsession?true:false 
+
+    if(!email || !password){
+        return 'Todos os campos precisam ser preenchidos'
+    }
+
+    if(!isEmail(email) || email.length > 42){
+        return 'Email inválido'
+    }
+
+    if(!isPassword(password)){
+        return 'Senha inválida'
+    }
+
+    const res = await fetch('http://localhost:3500/api/recruiter/login',
+        {
+            method: 'post',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                // keepSession: keepSession
+            }),
+            credentials: 'include'
+        }
+    )
+
+    if(res.status == 500){
+        return 'O servidor não processou corretamente a requisição, verfique se você digitou tudo corretamente e tente novamente'
+    }
+
+    if(res.status == 400){
+        return 'Email ou senha incorreto'
+    }
+
+    const resData = await res.json()
+    if(res.status == 200 ){
+        if(resData?.error){
+            return 'Email ou senha incorreto'
+        }
+        if(resData?.success){
+            return redirect('/') //'Usuário autenticado'
+        }
+    }
+
+    return 'Falha ao processar requisição'
+}
+
 
 export default function LoginPage(){
+
+    const actionReturn: string = useActionData() as string 
+    
     return(
     <main style={{'--image-url': `url(${ImageBgSky})`} as React.CSSProperties} className='bg-slate-200 w-screen h-screen bg-[image:var(--image-url)] bg-cover overflow-hidden sm:bg-none sm:flex sm:items-center'>
         <div className='sm:bg-white max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
@@ -35,15 +102,22 @@ export default function LoginPage(){
                         <label className='ml-3 mt-3' htmlFor="pass">Senha:</label>
                         <div className="relative">
                             <i className="fa fa-lock  absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
-                            <input className='focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="pass" id="pass" />
+                            <input className='focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="password" id="pass" />
                         </div>
                         <div className='flex flex-nowrap py-2'>
                             <input className='ml-2' type="checkbox" name="keepsession" id="keepsession" />
                             <label htmlFor="keepsession" className='ml-3'>Permanecer conectado</label>
                         </div>
+                        <img src={ImageUxSingUpIndicator} alt="" className="hidden tall:block sm:hidden absolute w-48 bottom-10 right-0" />
+                        {actionReturn && 
+                            <div className='fadein w-full bg-alert/70 rounded-sm'>
+                                <p className='text-white font-Roboto font-light text-sm text-center p-2'>
+                                    {actionReturn}
+                                </p>
+                            </div>
+                        }
                         <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Entrar <i className="fa fa-sign-in ext-base text-white/95" aria-hidden="true"></i></button>
                     </Form>
-                    <img src={ImageUxSingUpIndicator} alt="" className="hidden tall:block sm:hidden absolute w-48 bottom-10 right-0" />
                     <button className='absolute bottom-0 right-0 cursor-default sm:hidden'>
                         <Link className="cursor-pointer w-10 h-12 rotate-45 absolute right-3 bottom-3" to='/singup'></Link>
                         <img src={ImageFlipSingUp} alt="" />

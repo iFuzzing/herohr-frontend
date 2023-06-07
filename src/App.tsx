@@ -12,12 +12,17 @@ import StepsPage from './pages/StepsPage'
 import ApplicantsPage from './pages/ApplicantsPage'
 
 import {action as actionSingup} from './pages/SingupPage'
+import {action as actionLogin} from './pages/LoginPage'
+import {loader as loaderLogin} from './pages/LoginPage'
+import {loader as loaderSingup} from './pages/SingupPage'
+import LogoutPage from './pages/LogoutPage'
 
 const router = createBrowserRouter(createRoutesFromElements(
   <Route path='/' element={<MainLayout />}>
     <Route index element={<CompaniesPage />} />
-    <Route path='login' element={<LoginPage />} />
-    <Route path='singup' action={actionSingup} element={<SingupPage />} />
+    <Route path='login' loader={loaderLogin} action={actionLogin} element={<LoginPage />} />
+    <Route path='logout' element={<LogoutPage />} />
+    <Route path='singup' loader={loaderSingup} action={actionSingup} element={<SingupPage />} />
     <Route path='jobs' element={<JobsPage />} />
     <Route path='steps' element={<StepsPage />} />
     <Route path='applicants' element={<ApplicantsPage />} />

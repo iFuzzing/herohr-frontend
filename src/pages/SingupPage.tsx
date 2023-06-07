@@ -1,8 +1,15 @@
-import { Form, Link, useActionData } from 'react-router-dom'
+import { Form, Link, redirect, useActionData } from 'react-router-dom'
 import ImageFlipLogin from '../assets/images/login/flipToLogin.svg'
 import ImageHeroSingup from '../assets/images/singup/bg-hero-singup-SE.svg'
 import ImagemUxLoginIndicator from '../assets/images/singup/ux-singin-indicator.svg'
-import { isEmail, isPassword, isUsername } from '../utils/utils'
+import { isEmail, isPassword, isRecruiterAuthenticated, isUsername } from '../utils/utils'
+
+export async function loader(){
+    if(await isRecruiterAuthenticated()){
+        return redirect('/')
+    }
+    return null
+}
 
 export async function action({request}: { request: Request}){
     const data = Object.fromEntries(await request.formData())
@@ -32,7 +39,7 @@ export async function action({request}: { request: Request}){
         return 'Nome e sobrenome deve ter no máximo 32 caracteres'
     }
 
-    const res = await fetch('http://localhost:3500/api/singup',
+    const res = await fetch('http://localhost:3500/api/recruiter/singup',
         {
             method: 'post',
             headers: {
@@ -43,14 +50,24 @@ export async function action({request}: { request: Request}){
                 password: password,
                 firstname: firstname,
                 lastname: lastname
-            })
+            }),
+            credentials: 'include'
         }
     )
+    
+    if(res.status == 409){
+        return 'Esse email já está em uso'
+    }
 
-    const dataResponse = await res.json()
-    console.log(dataResponse)
+    if(res.status == 500){
+        return 'Falha ao fazer registro, espere um pouco e tente novamente.'
+    }
 
-    return null 
+    if(!res.ok){
+        return 'O servidor não processou corretamente os dados, verifique se você digitou tudo corretamente e tente novamente'
+    }
+
+    return redirect('/') //'Usuário registrado' 
 }
 
 export default function SingupPage(){
@@ -77,25 +94,31 @@ export default function SingupPage(){
                             <i className="fa fa-envelope absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
                             <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="email" name="email" id="email" autoFocus/>
                         </div>
-                        <label className='ml-3 mt-3' htmlFor="pass">Senha:</label>
+                        <label className='ml-3 mt-3' htmlFor="password">Senha:</label>
                         <div className="relative">
                             <i className="fa fa-lock  absolute left-4 bottom-2 text-label-tertiary text-lg" aria-hidden="true"></i>
                             <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="password" name="password" id="password" />
                         </div>
                         <div className='flex flex-nowrap py-2 gap-3 mx-auto'>
                             <div className="flex flex-col">
-                                <label className='ml-3' htmlFor="email">Primeiro nome</label>
-                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="text" name="firstname" id="firstanme" />
+                                <label className='ml-3' htmlFor="firstname">Primeiro nome</label>
+                                <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="text" name="firstname" id="firstname" />
                             </div>
                             <div className="flex flex-col">
-                                <label className='ml-3' htmlFor="email">Segundo nome</label>
+                                <label className='ml-3' htmlFor="lastname">Segundo nome</label>
                                 <input className='text-label-primary focus:outline-active-primary rounded-3xl shadow-md shadow-black/20 border-[1px] border-black/20 h-10 w-full px-10' type="text" name="lastname" id="lastname" />
                             </div>
                         </div>
+                        { actionReturn && 
+                            <div className='fadein w-full bg-alert/70 rounded-sm'>
+                                <p className='text-white font-Roboto font-light text-sm text-center p-2'>
+                                    {actionReturn}
+                                </p>
+                            </div>
+                        }
                         <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Registrar <i className="fa fa-user-plus text-sm text-white/95" aria-hidden="true"></i></button>
                     </Form>
                     <img src={ImagemUxLoginIndicator} alt="" className="hidden tall:block sm:hidden absolute w-40 bottom-10 right-0" />
-                    {actionReturn}
                     <button className='absolute bottom-0 right-0 cursor-default sm:hidden'>
                         <Link className="cursor-pointer w-10 h-12 rotate-45 absolute right-3 bottom-3" to='/login'></Link>
                         <img src={ImageFlipLogin} alt="" />
