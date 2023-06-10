@@ -1,6 +1,6 @@
 import ContentPage from '../components/ContentPage'
 import FormContentPage from '../components/FormContentPage'
-import {Link, Form} from 'react-router-dom'
+import {Link, Form, redirect} from 'react-router-dom'
 import {useState} from 'react'
 import ImageUber from '../assets/images/companies/Uber.png'
 import ImageProfile1 from '../assets/images/steps/profile (1).png'
@@ -8,6 +8,16 @@ import ImageProfile2 from '../assets/images/steps/profile (2).png'
 import ImageProfile3 from '../assets/images/steps/profile (3).png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFlag } from '@fortawesome/free-solid-svg-icons'
+import { isRecruiterAuthenticated } from '../utils/utils'
+
+export async function loader(){
+    if(!await isRecruiterAuthenticated()){
+        return redirect('/login')
+    }
+
+    return null
+}
+
 
 export default function StepsPage(){
     

@@ -2,8 +2,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ContentPage from '../components/ContentPage'
 import FormContentPage from '../components/FormContentPage'
 import {useState} from 'react'
-import { Link, Form } from 'react-router-dom'
+import { Link, Form, redirect } from 'react-router-dom'
 import { faBriefcase, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { isRecruiterAuthenticated } from '../utils/utils'
+
+export async function loader(){
+    if(!await isRecruiterAuthenticated()){
+        return redirect('/login')
+    }
+
+    return null
+}
 
 export default function JobsPage(){
     const [isFormVisible, setIsFormVisible] = useState(false)

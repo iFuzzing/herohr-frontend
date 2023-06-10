@@ -1,5 +1,5 @@
 import ContentPage from '../components/ContentPage'
-import {Link, Form} from 'react-router-dom'
+import {Link, Form, redirect} from 'react-router-dom'
 import {useState} from 'react'
 import ImageApplicant1 from '../assets/images/applicants/applicant (1).png'
 import ImageApplicant2 from '../assets/images/applicants/applicant (2).png'
@@ -9,6 +9,16 @@ import ImageApplicant4 from '../assets/images/applicants/applicant (4).png'
 import FormContentPage from '../components/FormContentPage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye } from '@fortawesome/free-solid-svg-icons'
+import { isRecruiterAuthenticated } from '../utils/utils'
+
+export async function loader(){
+    if(!await isRecruiterAuthenticated()){
+        return redirect('/login')
+    }
+
+    return null
+}
+
 
 export default function ApplicantsPage(){
     
