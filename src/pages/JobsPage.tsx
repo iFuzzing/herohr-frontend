@@ -6,9 +6,18 @@ import { Link, Form, redirect } from 'react-router-dom'
 import { faBriefcase, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { isRecruiterAuthenticated } from '../utils/utils'
 
-export async function loader(){
+export async function loader({request}:{request:Request}){
     if(!await isRecruiterAuthenticated()){
         return redirect('/login')
+    }
+
+    const params = new URL(request.url).searchParams
+    const company_id = params.get('company')
+
+    const res = await fetch(`http://localhost:3500/api/recruiter/company?id=${company_id}`, {credentials: 'include'})
+    if(!res.ok){
+        console.log('Falha ao encontrar empresa')
+        return redirect('/')
     }
 
     return null
@@ -36,7 +45,7 @@ export default function JobsPage(){
     const content =
     <>
     { isFormVisible &&
-    <FormContentPage title={'Cadastrar nova vaga'} toggleForm={toggleForm} formContent={formContent}/>
+    <FormContentPage isFormVisible={isFormVisible} title={'Cadastrar nova vaga'} toggleForm={toggleForm} formContent={formContent}/>
     }
     <ul className="flex flex-col sm:w-full sm:block">
         <Link to='#'>

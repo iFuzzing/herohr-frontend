@@ -6,12 +6,13 @@ interface Props{
     formProfileImage?: string;
     title?: string;
     formContent: any;
+    isFormVisible?: boolean;
 }
 
 export default function FormContentPage(props:Props){
     return (
         <>
-            <div className="fadein fixed w-screen h-screen bg-black/70 top-0 left-0 right-0 bottom-0 m-auto z-30">
+            <div className={(props.isFormVisible?'block':'hidden')+" fadein fixed w-screen h-screen bg-black/70 top-0 left-0 right-0 bottom-0 m-auto z-30"}>
                 <div className="absolute w-[95%] max-h-[700px] max-w-3xl overflow-y-auto h-fit rounded-md p-4 text-center top-0 left-0 right-0 bottom-0 m-auto bg-white shadow-md shadow-black/30 font-Kanit text-app-base-primary">
                     <h1 className='font-bold text-2xl'>HERO HR</h1>
                     <FontAwesomeIcon onClick={props.toggleForm} className='cursor-pointer material-symbols-outlined absolute right-0 top-0 p-2 m-2 text-white bg-black/20 rounded-full' icon={faClose} />
