@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation, useSearchParams } from 'react-router-dom'
 import ImageGGprofile from '../assets/images/mix/gg_profile.png'
 import ImageUxNavIndicator from '../assets/images/mix/ux-nav-Indicator.svg'
 import ImageUxNavIndicatorBullet from '../assets/images/mix/ux-nav-indicator-bullet.svg'
@@ -7,6 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight, faBars, faBriefcase, faCircleUser, faFlag, faHome, faUsers } from '@fortawesome/free-solid-svg-icons'
 
 export default function Header(){
+    const currentPage = useLocation().pathname
+    const [searchparams, setSearchParams] = useSearchParams()
+    const company_id = searchparams.get('company')
     return(
         <>
         <header className='sm:hidden justify-between flex flex-col px-5 py-2 h-48 bg-app-base-primary text-white font-Kanit font-bold'>
@@ -42,10 +45,10 @@ export default function Header(){
                     <ul className="sm:relative font-Kanit font-normal text-base flex flex-col">
                     <div className="hidden sm:block absolute w-[25%] h-[95%]">
                         <img className='w-full h-full' src={ImageUxNavIndicator} alt="" />
-                        <img className='absolute top-[10%] w-full h-[10%] scale-90' src={ImageUxNavIndicatorBullet} alt="" />
-                        <img className='absolute top-[35%] w-full h-[10%] scale-50' src={ImageUxNavIndicatorBulletEmpty} alt="" />
-                        <img className='absolute top-[60%] w-full h-[10%] scale-50' src={ImageUxNavIndicatorBulletEmpty} alt="" />
-                        <img className='absolute top-[85%] w-full h-[10%] scale-50' src={ImageUxNavIndicatorBulletEmpty} alt="" />
+                        <img className='animate-pulsein absolute top-[10%] w-full h-[10%] scale-90' src={ImageUxNavIndicatorBullet} alt="" />
+                        <img className={'absolute top-[35%] w-full h-[10%] '+(currentPage == '/jobs'||currentPage=='/steps'||currentPage=='/applicants'?'scale-90 animate-pulsein':'scale-50')} src={currentPage == '/jobs'||currentPage=='/steps'||currentPage == '/applicants'?ImageUxNavIndicatorBullet:ImageUxNavIndicatorBulletEmpty} alt="" />
+                        <img className={'absolute top-[60%] w-full h-[10%] '+(currentPage == '/steps'||currentPage=='/applicants'?'scale-90 animate-pulsein':'scale-50')} src={currentPage == '/steps'||currentPage=='/applicants'?ImageUxNavIndicatorBullet:ImageUxNavIndicatorBulletEmpty} alt="" />
+                        <img className={'absolute top-[85%] w-full h-[10%] '+(currentPage == '/applicants'?'scale-90 animate-pulsein':'scale-50')} src={currentPage == '/applicants'?ImageUxNavIndicatorBullet:ImageUxNavIndicatorBulletEmpty} alt="" />
                     </div>
                         <NavLink to='.' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start text-white  pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary':'')}}>
                             <li className="">
@@ -53,19 +56,19 @@ export default function Header(){
                                 Empresas
                             </li>
                         </NavLink>
-                        <NavLink to='/jobs' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start text-white/50  pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary':'')}}>
+                            <NavLink to={'/jobs'+(company_id!=null?`?company=${company_id}`:'')} className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4 ' +(isActive?' border-r-4 border-active-primary ':'') +(isActive || currentPage == '/steps' || currentPage == '/applicants'?' text-white':' text-white/50')}}>
                             <li className="">
                                     <FontAwesomeIcon className='mr-2 float-left text-xl' icon={faBriefcase} />
                                 Vagas
                             </li>
                         </NavLink>
-                        <NavLink to='/steps' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start text-white/50  pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary':'')}}>
+                        <NavLink to='/steps' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4 ' +(isActive?'border-r-4 border-active-primary':'') + (isActive||currentPage=='/applicants'?' text-white':' text-white/50')}}>
                             <li className="">
                                     <FontAwesomeIcon className='mr-2 float-left text-xl' icon={faFlag} />
                                 Etapas
                             </li>
                         </NavLink>
-                        <NavLink to='/applicants' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start text-white/50  pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary':'')}}>
+                        <NavLink to='/applicants' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4' + (isActive?' border-r-4 border-active-primary text-white':' text-white/50')}}>
                             <li className="">
                                 <FontAwesomeIcon className='mr-2 float-left text-xl' icon={faUsers} />
                                 Candidatos

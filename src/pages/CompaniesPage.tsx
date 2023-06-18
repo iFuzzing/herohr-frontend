@@ -123,7 +123,7 @@ export default function CompaniesPage(){
     }
 
     async function getCompany(company_id: string){
-        const res = await fetch(`http://localhost:3500/api/recruiter/company?id=${company_id}`, {credentials: 'include'})
+        const res = await fetch(`http://localhost:3500/api/recruiter/companies/company?id=${company_id}`, {credentials: 'include'})
         if(!res.ok){
             setActionReturn('Não foi possível obter os dados da empresa')
             return
