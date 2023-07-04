@@ -221,7 +221,7 @@ export default function JobsPage(){
     function buildJobsElements(jobs:Array<JobsType>){
         setJobsEl(jobs.map(job => {
             return(
-                <Link to='#' key={job._id}>
+                <Link to={`/steps?company=${companyId}&job=${job._id}`} key={job._id}>
                     <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block">
                         <FontAwesomeIcon className='float-left text-2xl bg-gray-200 p-4 rounded-full' icon={faBriefcase} />
                         <div className="flex flex-row w-full sm:w-auto">
