@@ -2,7 +2,7 @@ import { Form, Link, redirect, useActionData } from 'react-router-dom'
 import ImageFlipLogin from '../assets/images/login/flipToLogin.svg'
 import ImageHeroSingup from '../assets/images/singup/bg-hero-singup-SE.svg'
 import ImagemUxLoginIndicator from '../assets/images/singup/ux-singin-indicator.svg'
-import { isEmail, isPassword, isRecruiterAuthenticated, isUsername } from '../utils/utils'
+import { API_SERVER, isEmail, isPassword, isRecruiterAuthenticated, isUsername } from '../utils/utils'
 
 export async function loader(){
     if(await isRecruiterAuthenticated()){
@@ -39,7 +39,7 @@ export async function action({request}: { request: Request}){
         return 'Nome e sobrenome deve ter no máximo 32 caracteres'
     }
 
-    const res = await fetch('http://localhost:3500/api/recruiter/singup',
+    const res = await fetch(API_SERVER+'http://localhost:3500/api/recruiter/singup',
         {
             method: 'post',
             headers: {

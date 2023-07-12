@@ -10,7 +10,7 @@ import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.pn
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 
-import { isRecruiterAuthenticated } from '../utils/utils'
+import { API_SERVER, isRecruiterAuthenticated } from '../utils/utils'
 import parseHTML from 'html-react-parser'
 
 export async function loader(){
@@ -56,14 +56,14 @@ export async function action({request}:{request:Request}){
 
     let res: any
     if(!company_id){
-        res = await fetch('http://localhost:3500/api/recruiter/companies/new',{
+        res = await fetch(API_SERVER+'/api/recruiter/companies/new',{
             method: 'post',
             body: bodyData, 
             credentials: 'include'
         })
     }else{
         bodyData.append('id', company_id)
-        res = await fetch('http://localhost:3500/api/recruiter/companies/edit',{
+        res = await fetch(API_SERVER+'/api/recruiter/companies/edit',{
             method: 'post',
             body: bodyData,
             credentials: 'include'
@@ -107,7 +107,7 @@ export default function CompaniesPage(){
 
     function getCompanies(){
         const getCompanies = async ()=>{
-            const res = await fetch('http://localhost:3500/api/recruiter/companies',{credentials: 'include'})
+            const res = await fetch(API_SERVER+'/api/recruiter/companies',{credentials: 'include'})
             const resData = await res.json()
 
             buildCompaniesElements(resData)
@@ -123,7 +123,7 @@ export default function CompaniesPage(){
     }
 
     async function getCompany(company_id: string){
-        const res = await fetch(`http://localhost:3500/api/recruiter/companies/company?id=${company_id}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/companies/company?id=${company_id}`, {credentials: 'include'})
         if(!res.ok){
             setActionReturn('Não foi possível obter os dados da empresa')
             return
@@ -138,10 +138,10 @@ export default function CompaniesPage(){
         if(refInputName.current != null && refTextboxDescription.current != null){
             refInputName.current.value = company.name
             refTextboxDescription.current.value = company.description
-            setFormImgSrc(`http://localhost:3500/uploads/${company.picture}`)
+            setFormImgSrc(API_SERVER+`/uploads/${company.picture}`)
             setFormCompanyId(company._id)
 
-            const imgBlob:any = await getImgURL(`http://localhost:3500/uploads/${company.picture}`)
+            const imgBlob:any = await getImgURL(API_SERVER+`/uploads/${company.picture}`)
             let fileName = 'dejavu.png'
             let file = new File([imgBlob], fileName, {type:"image/png", lastModified:new Date().getTime()})
             let container = new DataTransfer()
@@ -190,7 +190,7 @@ export default function CompaniesPage(){
     }
 
     async function deleteCompany(){
-        const res = await fetch(`http://localhost:3500/api/recruiter/companies/delete?id=${companyToDeletion}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/companies/delete?id=${companyToDeletion}`, {credentials: 'include'})
         if(!res.ok){
             console.log("Falha ao deletar empresa")
             return
@@ -270,8 +270,8 @@ export default function CompaniesPage(){
     function buildCompaniesElements(companies:Array<CompaniesType>){
         setCompaniesEl(()=>companies.map(company=>{
             return (<Link key={company._id} to={`/jobs?company=${company._id}`}>
-                    <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block">
-                    <img src={`http://localhost:3500/uploads/${company.picture}`} alt="" className="w-16 h-16 rounded-full sm:float-left" />
+                    <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
+                    <img src={API_SERVER+`/uploads/${company.picture}`} alt="" className="w-16 h-16 rounded-full sm:float-left" />
                         <div className="flex flex-row justify-between w-full sm:w-auto">
                             <div className="w-full flex flex-col ml-3 font-Roboto">
                                 <h3 className="font-medium">{parseHTML(company.name)}</h3>

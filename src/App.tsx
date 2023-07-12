@@ -16,6 +16,7 @@ import {action as actionLogin} from './pages/LoginPage'
 import {action as actionCompanies} from './pages/CompaniesPage' 
 import {action as actionJobs} from './pages/JobsPage'
 import {action as actionSteps} from './pages/StepsPage'
+import {action as actionApplicants} from './pages/ApplicantsPage'
 
 import {loader as loaderLogin} from './pages/LoginPage'
 import {loader as loaderSingup} from './pages/SingupPage'
@@ -33,7 +34,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route path='singup' loader={loaderSingup} action={actionSingup} element={<SingupPage />} />
     <Route path='jobs' loader={loaderJobs} action={actionJobs} element={<JobsPage />} />
     <Route path='steps' loader={loaderSteps} action={actionSteps} element={<StepsPage />} />
-    <Route path='applicants' loader={loaderApplicants} element={<ApplicantsPage />} />
+    <Route path='applicants' loader={loaderApplicants} action={actionApplicants} element={<ApplicantsPage />} />
   </Route>
 ))
 

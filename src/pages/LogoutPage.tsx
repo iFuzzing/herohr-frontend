@@ -1,5 +1,6 @@
 import { Navigate} from "react-router-dom";
 import {useEffect, useState} from 'react'
+import { API_SERVER } from "../utils/utils";
 
 export default function LogoutPage(){
     
@@ -7,7 +8,7 @@ export default function LogoutPage(){
 
     useEffect(()=>{
         const logoutRecruiter = async ()=> {
-            const res = await fetch('http://localhost:3500/api/recruiter/logout', {credentials: 'include'})
+            const res = await fetch(API_SERVER+'/api/recruiter/logout', {credentials: 'include'})
             if(res.ok){
                 setLogoutState(true)
             }

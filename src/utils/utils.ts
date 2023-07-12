@@ -1,5 +1,8 @@
+export const API_SERVER = 'http://192.168.2.55:3500'
+
+
 export const isRecruiterAuthenticated = async()=>{	
-	const res = await fetch('http://localhost:3500/api/recruiter/auth', {credentials: 'include'})
+	const res = await fetch(API_SERVER+'/api/recruiter/auth', {credentials: 'include'})
 	if(res.ok){
 		return true
 	}

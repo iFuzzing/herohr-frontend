@@ -10,6 +10,9 @@ export default function Header(){
     const currentPage = useLocation().pathname
     const [searchparams, setSearchParams] = useSearchParams()
     const company_id = searchparams.get('company')
+    const jobid = searchparams.get('job')
+    const step = searchparams.get('step')
+
     return(
         <>
         <header className='sm:hidden justify-between flex flex-col px-5 py-2 h-48 bg-app-base-primary text-white font-Kanit font-bold'>
@@ -62,7 +65,7 @@ export default function Header(){
                                 Vagas
                             </li>
                         </NavLink>
-                        <NavLink to='/steps' className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4 ' +(isActive?'border-r-4 border-active-primary':'') + (isActive||currentPage=='/applicants'?' text-white':' text-white/50')}}>
+                        <NavLink to={`/steps?company=${company_id}&job=${jobid}`} className={({isActive})=>{return 'duration-100 py-5 h-10 flex items-center justify-start pl-[20%] w-full hover:border-white hover:border-r-4 ' +(isActive?'border-r-4 border-active-primary':'') + (isActive||currentPage=='/applicants'?' text-white':' text-white/50')}}>
                             <li className="">
                                     <FontAwesomeIcon className='mr-2 float-left text-xl' icon={faFlag} />
                                 Etapas

@@ -4,7 +4,7 @@ import FormContentPage from '../components/FormContentPage'
 import {useEffect, useRef, useState} from 'react'
 import { Link, Form, redirect, useLocation, useActionData, useNavigation } from 'react-router-dom'
 import { faBriefcase, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { isRecruiterAuthenticated } from '../utils/utils'
+import { API_SERVER, isRecruiterAuthenticated } from '../utils/utils'
 import parseHTML from 'html-react-parser'
 
 import ImageWaitingJobs from '../assets/images/jobs/jobs_idle.svg'
@@ -30,7 +30,7 @@ export async function action({request}:{request:Request}){
 
     let res:any
     if(!jobId){
-        res = await fetch('http://localhost:3500/api/recruiter/jobs/new',{
+        res = await fetch(API_SERVER+'/api/recruiter/jobs/new',{
             credentials: 'include',
             method: 'post',
             headers: {
@@ -43,7 +43,7 @@ export async function action({request}:{request:Request}){
             })
         })  
     }else{
-        res = await fetch('http://localhost:3500/api/recruiter/jobs/edit',{
+        res = await fetch(API_SERVER+'/api/recruiter/jobs/edit',{
             credentials: 'include',
             method: 'post',
             headers: {
@@ -82,7 +82,7 @@ export async function loader({request}:{request:Request}){
     const params = new URL(request.url).searchParams
     const company_id = params.get('company')
 
-    const res = await fetch(`http://localhost:3500/api/recruiter/companies/company?id=${company_id}`, {credentials: 'include'})
+    const res = await fetch(API_SERVER+`/api/recruiter/companies/company?id=${company_id}`, {credentials: 'include'})
     if(!res.ok){
         return redirect('/')
     }
@@ -112,7 +112,7 @@ export default function JobsPage(){
     const refTextboxDescription = useRef<any>(null)
 
     async function getJobs(){
-        const res = await fetch(`http://localhost:3500/api/recruiter/jobs?company=${companyId}&job=${FormJobId}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/jobs?company=${companyId}&job=${FormJobId}`, {credentials: 'include'})
         if(!res.ok){
             console.log('Falha ao obter trabalhos')
             return
@@ -122,7 +122,7 @@ export default function JobsPage(){
     }
     
     async function getJob(jobId: string){
-        const res = await fetch(`http://localhost:3500/api/recruiter/jobs/job?company=${companyId}&job=${jobId}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/jobs/job?company=${companyId}&job=${jobId}`, {credentials: 'include'})
         if(!res.ok){
             setActionReturn('Não foi possível obter os dados do trabalho')
             return
@@ -157,7 +157,7 @@ export default function JobsPage(){
     }
 
     async function deleteJob(){
-        const res = await fetch(`http://localhost:3500/api/recruiter/jobs/delete?job=${jobToDeletion}&company=${companyId}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/jobs/delete?job=${jobToDeletion}&company=${companyId}`, {credentials: 'include'})
         if(!res.ok){
             console.log("Falha ao deletar trabalho")
             return
@@ -222,7 +222,7 @@ export default function JobsPage(){
         setJobsEl(jobs.map(job => {
             return(
                 <Link to={`/steps?company=${companyId}&job=${job._id}`} key={job._id}>
-                    <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block">
+                    <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
                         <FontAwesomeIcon className='float-left text-2xl bg-gray-200 p-4 rounded-full' icon={faBriefcase} />
                         <div className="flex flex-row w-full sm:w-auto">
                             <div className="w-full flex flex-col ml-3 font-Roboto">
@@ -289,7 +289,7 @@ export default function JobsPage(){
                     JobsEl:
                     <div className='p-14 gap-2 flex flex-col flex-center w-full text-center font-Roboto'>
                         <h1 className='font-medium'>Nenhuma vaga adicionada</h1>
-                        <h3 className='text-sm text-label-secondary'>(Talvez seja a hora de oferecer uma ótima oportunidade para aquela pessoa talentosa)</h3>
+                        <h3 className='text-sm text-label-secondary'>(Talvez seja a hora de oferecer uma ótima oportunidade para uma pessoa super talentosa)</h3>
                         <img className='w-56 self-center' src={ImageWaitingJobs} alt='Jobs waiting content img'/>
                     </div>
         }

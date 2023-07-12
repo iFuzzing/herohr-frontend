@@ -9,7 +9,7 @@ import ImageProfile3 from '../assets/images/steps/profile (3).png'
 import ImageWaitingSteps from '../assets/images/steps/steps_idle.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faFlag, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { isRecruiterAuthenticated } from '../utils/utils'
+import { API_SERVER, isRecruiterAuthenticated } from '../utils/utils'
 
 export async function action({request}:{request: Request}){
     const formData = Object.fromEntries(await request.formData())
@@ -35,7 +35,7 @@ export async function action({request}:{request: Request}){
 
     let res
     if(!step){
-        res = await fetch(`http://localhost:3500/api/recruiter/steps/new`,
+        res = await fetch(API_SERVER+`/api/recruiter/steps/new`,
             {
             method: 'post',
             credentials: 'include',
@@ -49,7 +49,7 @@ export async function action({request}:{request: Request}){
                 })
             })
     }else{
-        res = await fetch(`http://localhost:3500/api/recruiter/steps/edit`,
+        res = await fetch(API_SERVER+`/api/recruiter/steps/edit`,
             {
             method: 'post',
             credentials: 'include',
@@ -85,12 +85,12 @@ export async function loader({request}:{request:Request}){
 
     let res:any
     
-    res = await fetch(`http://localhost:3500/api/recruiter/companies/company?id=${companyId}`, {credentials: 'include'})
+    res = await fetch(API_SERVER+`/api/recruiter/companies/company?id=${companyId}`, {credentials: 'include'})
     if(!res.ok){
         return redirect('/')
     }
 
-    res = await fetch(`http://localhost:3500/api/recruiter/jobs/job?company=${companyId}&job=${jobId}`, {credentials: 'include'})
+    res = await fetch(API_SERVER+`/api/recruiter/jobs/job?company=${companyId}&job=${jobId}`, {credentials: 'include'})
     if(!res.ok){
         return redirect(`/jobs?company=${companyId}`)
     }
@@ -138,7 +138,7 @@ export default function StepsPage(){
 
     async function getStepsAndUpdate(){
         const getSteps = async ()=>{
-            const res = await fetch(`http://localhost:3500/api/recruiter/steps?company=${companyId}&job=${jobId}`, {credentials: 'include'})
+            const res = await fetch(API_SERVER+`/api/recruiter/steps?company=${companyId}&job=${jobId}`, {credentials: 'include'})
             if(!res.ok){
                 console.log(res.text)
                 return
@@ -173,7 +173,7 @@ export default function StepsPage(){
     }
 
     async function getStep(stepId: string){
-        const res = await fetch(`http://localhost:3500/api/recruiter/steps/step?step=${stepId}&company=${companyId}&job=${jobId}`,{credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/steps/step?step=${stepId}&company=${companyId}&job=${jobId}`,{credentials: 'include'})
         if(!res.ok){
             console.log("Erro ao obter etapa")
             return
@@ -205,7 +205,7 @@ export default function StepsPage(){
         event.preventDefault()
         console.log('Deleting step: ',stepId)
 
-        const res = await fetch(`http://localhost:3500/api/recruiter/steps/delete?step=${stepId}&company=${companyId}&job=${jobId}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/recruiter/steps/delete?step=${stepId}&company=${companyId}&job=${jobId}`, {credentials: 'include'})
         if(!res.ok){
             console.log("Falha ao deletar etapa")
             return
@@ -231,9 +231,9 @@ export default function StepsPage(){
     function buildStepsElements(steps:any){
         setStepsEl(steps.map((step:any)=>{
             return (
-                <Link key={step._id} className='relative my-3 sm:max-w-[250px] sm:mx-3 hover:scale-105 transition delay-100' to={'#'}>
-                    <div className='w-full sm:w-60  h-48 bg-gray-700 font-Roboto text-white text-center rounded-md p-3'>
-                        <h1 className='text-app-base-primary font-bold text-6xl sm:text-4xl  '># Etapa {step.position}</h1>
+                <Link key={step._id} className='relative my-3 sm:max-w-[250px] sm:mx-3 hover:scale-105 transition delay-100' to={`/applicants?company=${companyId}&job=${jobId}&step=${step._id}`}>
+                    <div className='w-full sm:w-60 bg-gradient-to-r from-indigo-500 to-purple-500 h-48 bg-gray-700 font-Roboto text-white text-center rounded-md p-3'>
+                        <h1 className='uppercase font-bold text-6xl sm:text-4xl  '># Etapa {step.position}</h1>
                         <p className='font-light m-8'>{step.description}</p>
                     </div>
                     <div className="w-full px-5 absolute bottom-1 flex flex-row justify-between">

@@ -7,7 +7,7 @@ import ImageHero from '../assets/images/login/bg-hero-login.png'
 import ImageFlipSingUp from '../assets/images/login/flipToSingup.svg'
 import ImageUxSingUpIndicator from '../assets/images/login/SingupUxIndicator.svg'
 import { Form } from 'react-router-dom'
-import { isEmail, isPassword, isRecruiterAuthenticated } from '../utils/utils'
+import { API_SERVER, isEmail, isPassword, isRecruiterAuthenticated } from '../utils/utils'
 
 export async function loader(){
     if(await isRecruiterAuthenticated()){
@@ -35,7 +35,7 @@ export async function action({request}:{request: Request}){
         return 'Senha inválida'
     }
 
-    const res = await fetch('http://localhost:3500/api/recruiter/login',
+    const res = await fetch(API_SERVER+'/api/recruiter/login',
         {
             method: 'post',
             headers: {
