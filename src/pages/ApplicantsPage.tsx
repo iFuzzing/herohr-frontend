@@ -1,20 +1,32 @@
 import ContentPage from '../components/ContentPage'
-import {Link, Form, redirect, useActionData} from 'react-router-dom'
+import {Link, Form, redirect, useActionData, useSearchParams} from 'react-router-dom'
 import {useEffect, useState} from 'react'
 import ImageApplicant1 from '../assets/images/applicants/applicant (1).png'
-import ImageApplicant2 from '../assets/images/applicants/applicant (2).png'
-import ImageApplicant3 from '../assets/images/applicants/applicant (3).png'
-import ImageApplicant4 from '../assets/images/applicants/applicant (4).png'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
-//import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
+import ImageWaitingApplicants from '../assets/images/applicants/applicants_idle.svg'
 import FormContentPage from '../components/FormContentPage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye } from '@fortawesome/free-solid-svg-icons'
 import { API_SERVER, isEmail, isRecruiterAuthenticated } from '../utils/utils'
 
-export async function loader(){
+export async function loader({request}:{request: Request}){
     if(!await isRecruiterAuthenticated()){
         return redirect('/login')
+    }
+    const params = new URL(request.url).searchParams
+    const companyId = params.get('company')
+    const jobId = params.get('job')
+
+    let res:any
+    
+    res = await fetch(API_SERVER+`/api/recruiter/companies/company?id=${companyId}`, {credentials: 'include'})
+    if(!res.ok){
+        return redirect('/')
+    }
+
+    res = await fetch(API_SERVER+`/api/recruiter/jobs/job?company=${companyId}&job=${jobId}`, {credentials: 'include'})
+    if(!res.ok){
+        return redirect(`/jobs?company=${companyId}`)
     }
 
     return null
@@ -142,28 +154,96 @@ export default function ApplicantsPage(){
     const [isFormAdditionVisible, setIsFormAdditionVisible] = useState(false)
     const [isFormViwerVisible, setIsFormViwerVisible] = useState(false)
     const [FormImgSrc, setFormImgSrc] = useState(ImageFormPlaceHolder)
+    const [ApplicantsEl, setApplicantsEl] = useState([] as JSX.Element[]) 
+    const [ViwerFormData, setViwerFormData] = useState(
+        {
+            picture: ImageFormPlaceHolder as string,
+            name: '',
+            aboutme: '',
+            contact: {
+                linkedin: '',
+                email: '',
+                phone: ''
+            },
+            skills:[
+                {skill:'',value: 0}
+            ],
+            portfolio: ''
+        }
+    )
+    const [ViwerSkillsEl, setViwerSkillsEl] = useState([] as JSX.Element[])
+
 
     const actionReturn = useActionData() as string
+    const [searchParams] = useSearchParams()
+    const jobId = searchParams.get('job')
+    const stepId = searchParams.get('step')
 
     function toggleAdditionForm(){
         setIsFormAdditionVisible((prevIsFormVisible)=> !prevIsFormVisible)
     }
 
-    function toggleViwerForm(){
+    function toggleViwerForm(event:any, applicant: string = ''){
+        if(event)
+            event.preventDefault()
+        
+        if(applicant)
+            getAplicantRef(applicant)
+
         setIsFormViwerVisible((prevIsFormViwerVisible)=> !prevIsFormViwerVisible)
+    }
+
+
+    async function getAplicantRef(id: string){
+        const res = await fetch(API_SERVER+`/api/applicant?id=${id}&job=${jobId}`,{credentials: 'include'}) 
+        if(!res.ok){
+            console.log(res.text())
+            return 
+        }
+
+       fillViwerForm(await res.json()) 
+    }
+
+    async function fillViwerForm(applicant: any){
+        const applicantData = {
+            picture: API_SERVER+'/uploads/'+applicant.picture,
+            name: applicant.name,
+            aboutme: applicant.aboutme,
+            contact: {
+                linkedin: applicant.contact.linkedin,
+                email: applicant.contact.email,
+                phone: applicant.contact.phone
+            },
+            skills: applicant.skills,
+            portfolio: applicant.portfolio
+        }
+
+        setViwerFormData(applicantData)
+        setViwerSkillsEl(applicant.skills.map((skill: any, index: any)=>{
+            return (<>
+               <span className='font-Roboto font-light text-sm'>{skill.skill}</span>
+               <div className='w-full flex justify-evenly items-center'>
+                    <span className='float-left block text-gray-400'>0</span>
+                    <div className='relative w-full bg-gray-300 rounded-lg mx-2'>
+                        { skill.value>0&&skill.value<10 && <span style={{left: `${skill.value}0%`}} className={`absolute top-[-20px] text-gray-400`}>{skill.value}</span>}
+                        <div className={`p-1 w-[${skill.value}0%] bg-app-base-primary rounded-lg`}></div>
+                    </div> 
+                    <span className='float-right block text-gray-400'>10</span>
+               </div></>)
+        }))
     }
 
     const formViwerContent = 
         <Form className='pb-5 overflow-auto w-11/12 h-[550px] s400:h-[700px] md:h-fit flex flex-col gap-2 text-left sm:items-start m-5 font-Roboto text-label-primary' method='post' encType="multipart/form-data">
-                    <img className='self-center sm:hidden w-25 h-25 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ImageApplicant1} alt="" placeholder=''/>
-                    <h3 className='font-bold text-title-primary text-center'>Angela Machado</h3>
+                    <img className='self-center sm:hidden w-25 h-25 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ViwerFormData.picture} alt="" placeholder=''/>
+                    <h3 className='font-bold text-title-primary text-center'>{ViwerFormData.name}</h3>
                     <label className='text-sm' htmlFor="company_name">Tags para esse candidato</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
                        <span className='text-gray-500 text-sm'>(Clique para definir tags)</span> 
                     </div>
                     <label className='text-sm' htmlFor="company_name">Sobre mim</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
-                    <p className='overflow-auto h-24'>Sou simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
+                        <p className='overflow-auto h-24'>{ViwerFormData.aboutme}</p>
                     </div>
                     <label className='text-sm' htmlFor="company_name">Contato</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
@@ -171,47 +251,21 @@ export default function ApplicantsPage(){
                             <i className="fa-brands fa-linkedin-in"></i> 
                             <i className="fa-regular fa-envelope"></i>
                             <i className="fa-solid fa-address-book"></i>
-                            <Link to={'/'} className='underline'>Angela Machado</Link>
-                            <Link to={'/'} className='underline'>angela.machado@email.com</Link>
-                            <Link to={'/'} className='underline'>(01) 99123-4567</Link>
+                            <Link to={'/'} className='underline'>{ViwerFormData.contact.linkedin}</Link>
+                            <Link to={'/'} className='underline'>{ViwerFormData.contact.email}</Link>
+                            <Link to={'/'} className='underline'>{ViwerFormData.contact.phone}</Link>
                         </div>
                     </div>
                     <label className='text-sm' htmlFor="company_name">Habilidades</label> 
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
-                       <span className='font-Roboto font-light text-sm'>React</span>
-                       <div className='w-full flex justify-evenly items-center'>
-                            <span className='float-left block text-gray-400'>0</span>
-                            <div className='relative w-full bg-gray-300 rounded-lg mx-2'>
-                                <span className='absolute top-[-20px] left-[80%] text-gray-400'>8</span>
-                                <div className='p-1 w-[80%] bg-app-base-primary rounded-lg'></div>
-                            </div> 
-                            <span className='float-right block text-gray-400'>10</span>
-                       </div>
-                       <span className='font-Roboto font-light text-sm'>Next.js</span>
-                       <div className='w-full flex justify-evenly items-center'>
-                            <span className='float-left block text-gray-400'>0</span>
-                            <div className='relative w-full bg-gray-300 rounded-lg mx-2'>
-                                <span className='absolute top-[-20px] left-[70%] text-gray-400'>7</span>
-                                <div className='p-1 w-[70%] bg-app-base-primary rounded-lg'></div>
-                            </div> 
-                            <span className='float-right block text-gray-400'>10</span>
-                       </div>
-                       <span className='font-Roboto font-light text-sm'>Tailwindcss</span>
-                       <div className='w-full flex justify-evenly items-center'>
-                            <span className='float-left block text-gray-400'>0</span>
-                            <div className='relative w-full bg-gray-300 rounded-lg mx-2'>
-                                <span className='absolute top-[-20px] left-[90%] text-gray-400'>9</span>
-                                <div className='p-1 w-[90%] bg-app-base-primary rounded-lg'></div>
-                            </div> 
-                            <span className='float-right block text-gray-400'>10</span>
-                       </div>
+                    {ViwerSkillsEl}
                     </div>
                     <label className='text-sm' htmlFor="company_name">Portfólio/Trabalhos</label> 
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
                         <i className="fa-solid fa-globe"></i>
-                        <Link to={'/'} className='ml-2 underline'>https://meuportfolio.com</Link>
+                        <Link to={'/'} className='ml-2 underline'>{ViwerFormData.portfolio}</Link>
                     </div>
-                    <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Salvar</button>
+                    <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Editar</button>
                 </Form>
 
 
@@ -319,7 +373,7 @@ export default function ApplicantsPage(){
             <div className='gap-3 w-full border-[1px] border-label-secondary/20 p-2 rounded-md font-Roboto'>
                 <div className='w-full grid grid-flow-row grid-cols-2 gap-3'>
                     <label className='text-sm'>Habilidade</label> 
-                    <label className='text-sm'>Nível</label> 
+                    <label className='text-sm'>Nível</label>
                     {SkillsEl}
                     <button disabled={SkillsEl.length<=1?true:false} className={SkillsEl.length<=1?'bg-alert/50':'bg-alert' + ' p-1 text-sm rounded-sm text-white'} onClick={deleteSkillField}>- Remover</button>
                     <button disabled={SkillsEl.length>=10?true:false} className={SkillsEl.length>=10?'bg-app-base-primary/30':'bg-app-base-primary' + ' p-1 text-sm rounded-sm text-white'} onClick={createSkillField}>+ Adicionar</button>
@@ -335,6 +389,52 @@ export default function ApplicantsPage(){
         </Form>
         </>
 
+
+    async function getApplicants(){
+            let res
+                if(stepId){
+                    res = await fetch(API_SERVER+`/api/applicant/linking?job=${jobId}&step=${stepId}`, {credentials: 'include'})
+                }else{
+                    res = await fetch(API_SERVER+`/api/applicant/linking?job=${jobId}`, {credentials: 'include'})
+                }
+
+            if(!res.ok){
+                console.log("Falha ao obter candidatos: "+res.text())
+                return
+            }
+
+            buildApplicantsElements(await res.json())
+    }
+
+    useEffect(()=>{
+        getApplicants()
+    },[])
+
+    function buildApplicantsElements(applicants: any){
+        setApplicantsEl(applicants.map((applicant: any, index:any)=>{
+           return (
+                <button key={index} onClick={(event)=>toggleViwerForm(event, applicant.applicant)} >
+                <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
+                    <img src={API_SERVER+`/uploads/${applicant.applicant_pic}`} alt="" className="w-16 sm:float-left rounded-full" />
+                    <div className="flex flex-row  w-full sm:w-auto">
+                        <div className="w-full flex flex-col ml-3 font-Roboto text-left">
+                            <h3 className="font-medium">{applicant.applicant_name}</h3>
+                           <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
+                                <span className='py-1 px-2 rounded-full bg-gray-400'># {applicant.step}ª Etapa</span>
+                           </div>
+                        </div>
+                        <div className="flex flex-col justify-between">
+                            <Link to='/1'>
+                                    <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
+                            </Link>
+                        </div>
+                    </div>
+                </li>
+            </button>
+           ) 
+        }))
+    } 
+
     const content = 
     <>
     { isFormAdditionVisible && 
@@ -342,97 +442,17 @@ export default function ApplicantsPage(){
     }
 
     { isFormViwerVisible && 
-         <FormContentPage toggleForm={toggleViwerForm} formProfileImage={ImageApplicant1} formContent={formViwerContent} isFormVisible={isFormViwerVisible}/>
+                <FormContentPage toggleForm={()=>toggleViwerForm(null)} formProfileImage={ViwerFormData.picture} formContent={formViwerContent} isFormVisible={isFormViwerVisible}/>
     }
- 
+
     <ul className="flex flex-col flex-nowrap :w-full ">
-        <button onClick={toggleViwerForm}>
-        <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block  hover:bg-active-primary/10">
-            <img src={ImageApplicant1} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row  w-full sm:w-auto">
-                <div className="w-full flex flex-col ml-3 font-Roboto text-left">
-                   <h3 className="font-medium">Angela Machado</h3>
-                   <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
-                    <span className='py-1 px-2 rounded-full bg-gray-400'># 1ª Etapa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#31DCA9]'># Experiente</span>
-                    <span className='py-1 px-2 rounded-full bg-[#32D0E5]'># Ágil</span>
-                    <span className='py-1 px-2 rounded-full bg-[#6B91F2]'># Habilidosa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#BADC31]'># Falta alguma hardskill</span>
-                   </div>
-                </div>
-                <div className="flex flex-col justify-between">
-                    <Link to='/1'>
-                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
-                    </Link>
-                </div>
+        {ApplicantsEl[0]?ApplicantsEl:
+            <div className='p-14 flex flex-col flex-center w-full text-center font-Roboto'>
+                <h1 className='font-medium'>Nenhum candidato registrado ou presente nessa etapa</h1>
+                <h3 className='text-sm text-label-secondary'>(Se não registrado, você pode adicionar manualmente ou gerar um link para que os candidatos façam isso sozinhos. Eles aparecerão na etapa 1 em seguida)</h3>
+                <img className='w-56 self-center' src={ImageWaitingApplicants} alt='Companies waiting content img'/>
             </div>
-        </li>
-        </button>
-
-    <button>
-        <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
-            <img src={ImageApplicant2} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row  w-full sm:w-auto">
-                <div className="w-full flex flex-col ml-3 font-Roboto text-left">
-                    <h3 className="font-medium">Counrtney Henry</h3>
-                   <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
-                        <span className='py-1 px-2 rounded-full bg-gray-400'># 1ª Etapa</span>
-                   </div>
-                </div>
-                <div className="flex flex-col justify-between">
-                    <Link to='/1'>
-                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
-                    </Link>
-                </div>
-            </div>
-        </li>
-    </button>
-
-    <button>
-        <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
-            <img src={ImageApplicant3} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row  w-full sm:w-auto">
-                <div className="w-full flex flex-col ml-3 font-Roboto text-left">
-                    <h3 className="font-medium">Darrel Steward</h3>
-                    <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
-                    <span className='py-1 px-2 rounded-full bg-[#00D1FF]'># 2ª Etapa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#31DCA9]'># Experiente</span>
-                    <span className='py-1 px-2 rounded-full bg-[#32D0E5]'># Ágil</span>
-                    <span className='py-1 px-2 rounded-full bg-[#6B91F2]'># Habilidosa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#BADC31]'># Falta alguma hardskill</span>
-                   </div>
-                </div>
-                <div className="flex flex-col justify-between">
-                    <Link to='/1'>
-                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
-                    </Link>
-                </div>
-            </div>
-        </li>
-    </button>
-
-    <button>
-        <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
-            <img src={ImageApplicant4} alt="" className="w-16 sm:float-left" />
-            <div className="flex flex-row  w-full sm:w-auto">
-                <div className="w-full flex flex-col ml-3 font-Roboto text-left">
-                    <h3 className="font-medium">Theresa Webb</h3>
-                    <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
-                    <span className='py-1 px-2 rounded-full bg-gray-400'># 1ª Etapa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#31DCA9]'># Experiente</span>
-                    <span className='py-1 px-2 rounded-full bg-[#32D0E5]'># Ágil</span>
-                    <span className='py-1 px-2 rounded-full bg-[#6B91F2]'># Habilidosa</span>
-                    <span className='py-1 px-2 rounded-full bg-[#BADC31]'># Falta alguma hardskill</span>
-                   </div>
-                </div>
-                <div className="flex flex-col justify-between">
-                    <Link to='/1'>
-                            <FontAwesomeIcon className='text-label-secondary/40' icon={faEye} />
-                    </Link>
-                </div>
-            </div>
-        </li>
-    </button>
+        }
     </ul>
     </>
     return (

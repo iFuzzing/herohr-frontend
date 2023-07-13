@@ -1,4 +1,5 @@
-export const API_SERVER = 'http://192.168.2.55:3500'
+//export const API_SERVER = 'http://192.168.2.52:3500'
+export const API_SERVER = 'http://localhost:3500'
 
 
 export const isRecruiterAuthenticated = async()=>{	

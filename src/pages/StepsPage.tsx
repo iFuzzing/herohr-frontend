@@ -18,13 +18,6 @@ export async function action({request}:{request: Request}){
     const company = formData.companyid as string
     const step = formData.step as string
 
-    console.log(JSON.stringify({
-            company: company,
-            job: job,
-            description: description
-            })
-)
-
     if(!description || description.length > 150){
         return 'A descrição deve ter de 1 a 150 caracteres'
     }
@@ -203,15 +196,12 @@ export default function StepsPage(){
 
     async function deleteStep(event:any, stepId:string){
         event.preventDefault()
-        console.log('Deleting step: ',stepId)
 
         const res = await fetch(API_SERVER+`/api/recruiter/steps/delete?step=${stepId}&company=${companyId}&job=${jobId}`, {credentials: 'include'})
         if(!res.ok){
-            console.log("Falha ao deletar etapa")
             return
         }
 
-        console.log('Etapada deletada!')
         getStepsAndUpdate()
         toggleDeleteConfirmationForm()
     }
@@ -231,7 +221,7 @@ export default function StepsPage(){
     function buildStepsElements(steps:any){
         setStepsEl(steps.map((step:any)=>{
             return (
-                <Link key={step._id} className='relative my-3 sm:max-w-[250px] sm:mx-3 hover:scale-105 transition delay-100' to={`/applicants?company=${companyId}&job=${jobId}&step=${step._id}`}>
+                <Link key={step._id} className='relative my-3 sm:max-w-[250px] sm:mx-3 hover:scale-105 transition delay-100' to={`/applicants?company=${companyId}&job=${jobId}&step=${step.position}`}>
                     <div className='w-full sm:w-60 bg-gradient-to-r from-indigo-500 to-purple-500 h-48 bg-gray-700 font-Roboto text-white text-center rounded-md p-3'>
                         <h1 className='uppercase font-bold text-6xl sm:text-4xl  '># Etapa {step.position}</h1>
                         <p className='font-light m-8'>{step.description}</p>
