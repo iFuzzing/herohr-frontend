@@ -1,12 +1,11 @@
 import ContentPage from '../components/ContentPage'
 import {Link, Form, redirect, useActionData, useSearchParams} from 'react-router-dom'
-import {useEffect, useState} from 'react'
-import ImageApplicant1 from '../assets/images/applicants/applicant (1).png'
+import {useEffect, useRef, useState} from 'react'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
 import ImageWaitingApplicants from '../assets/images/applicants/applicants_idle.svg'
 import FormContentPage from '../components/FormContentPage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faFlag, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { API_SERVER, isEmail, isRecruiterAuthenticated } from '../utils/utils'
 
 export async function loader({request}:{request: Request}){
@@ -47,6 +46,8 @@ export async function action({request}:{request: Request}){
         return 'O formulário precisa ser preenchido corretamente'
     }
 
+    const formType = dataForm.formtype as string
+    const applicant = dataForm.applicant as string
     const aboutme = dataForm.aboutme as string
     const email = dataForm.email as string
     const github = dataForm.github as string
@@ -127,6 +128,7 @@ export async function action({request}:{request: Request}){
         phone: phone,
         linkedin: linkedin
     })
+
     let bodyData = new FormData() 
     bodyData.append('aboutme', aboutme)
     bodyData.append('name', name)
@@ -136,11 +138,21 @@ export async function action({request}:{request: Request}){
     bodyData.append('skills', JSON.stringify(skills))
     bodyData.append('job', jobId)
 
-    const res = await fetch(API_SERVER+ '/api/applicant/new/ref', {
-        credentials: 'include',
-        method: 'post',
-        body: bodyData
-    })
+    let res
+    if(!formType || formType != 'edition'){
+        res = await fetch(API_SERVER+ '/api/applicant/new/ref', {
+            credentials: 'include',
+            method: 'post',
+            body: bodyData
+        })
+    }else{
+        bodyData.append('applicant', applicant)
+        res = await fetch(API_SERVER+ '/api/applicant/edit/ref', {
+            credentials: 'include',
+            method: 'post',
+            body: bodyData
+        })
+    }
     
     if(!res.ok){
         return 'Alguma coisa errada com o formulário'
@@ -153,17 +165,21 @@ export default function ApplicantsPage(){
     
     const [isFormAdditionVisible, setIsFormAdditionVisible] = useState(false)
     const [isFormViwerVisible, setIsFormViwerVisible] = useState(false)
+    const [ControlsApplicantReturn, setControlsApplicantReturn] = useState('')
+    const [isFormEditionVisible, setIsFormEditionVisible] = useState(false)
     const [FormImgSrc, setFormImgSrc] = useState(ImageFormPlaceHolder)
     const [ApplicantsEl, setApplicantsEl] = useState([] as JSX.Element[]) 
     const [ViwerFormData, setViwerFormData] = useState(
         {
+            _id: '',
             picture: ImageFormPlaceHolder as string,
             name: '',
             aboutme: '',
             contact: {
                 linkedin: '',
                 email: '',
-                phone: ''
+                phone: '',
+                github: ''
             },
             skills:[
                 {skill:'',value: 0}
@@ -172,7 +188,12 @@ export default function ApplicantsPage(){
         }
     )
     const [ViwerSkillsEl, setViwerSkillsEl] = useState([] as JSX.Element[])
+    const [EditionSkillsEl, setEditionSkillsEl] = useState([] as JSX.Element[])
 
+    const [Skills, setSkills] = useState([{'skill':'React','value':0}])
+    const [EditionSkills, setEditionSkills] = useState(Skills)
+
+    const refInputImage = useRef<any>(null)
 
     const actionReturn = useActionData() as string
     const [searchParams] = useSearchParams()
@@ -180,6 +201,7 @@ export default function ApplicantsPage(){
     const stepId = searchParams.get('step')
 
     function toggleAdditionForm(){
+        setFormImgSrc(ImageFormPlaceHolder)
         setIsFormAdditionVisible((prevIsFormVisible)=> !prevIsFormVisible)
     }
 
@@ -188,13 +210,21 @@ export default function ApplicantsPage(){
             event.preventDefault()
         
         if(applicant)
-            getAplicantRef(applicant)
+            getApplicantRef(applicant)
 
         setIsFormViwerVisible((prevIsFormViwerVisible)=> !prevIsFormViwerVisible)
     }
+    
+    function toggleEditionForm(event: any = undefined){
+        if(event)
+            event.preventDefault()
+
+        setIsFormViwerVisible((prevIsFormViwerVisible)=> !prevIsFormViwerVisible)
+        setIsFormEditionVisible((prevIsFormVisible)=> !prevIsFormVisible) 
+    }
 
 
-    async function getAplicantRef(id: string){
+    async function getApplicantRef(id: string){
         const res = await fetch(API_SERVER+`/api/applicant?id=${id}&job=${jobId}`,{credentials: 'include'}) 
         if(!res.ok){
             console.log(res.text())
@@ -206,13 +236,15 @@ export default function ApplicantsPage(){
 
     async function fillViwerForm(applicant: any){
         const applicantData = {
+            _id: applicant._id,
             picture: API_SERVER+'/uploads/'+applicant.picture,
             name: applicant.name,
             aboutme: applicant.aboutme,
             contact: {
                 linkedin: applicant.contact.linkedin,
                 email: applicant.contact.email,
-                phone: applicant.contact.phone
+                phone: applicant.contact.phone,
+                github: applicant.contact.github
             },
             skills: applicant.skills,
             portfolio: applicant.portfolio
@@ -220,21 +252,59 @@ export default function ApplicantsPage(){
 
         setViwerFormData(applicantData)
         setViwerSkillsEl(applicant.skills.map((skill: any, index: any)=>{
-            return (<>
+            return (<div key={index}>
                <span className='font-Roboto font-light text-sm'>{skill.skill}</span>
                <div className='w-full flex justify-evenly items-center'>
                     <span className='float-left block text-gray-400'>0</span>
                     <div className='relative w-full bg-gray-300 rounded-lg mx-2'>
                         { skill.value>0&&skill.value<10 && <span style={{left: `${skill.value}0%`}} className={`absolute top-[-20px] text-gray-400`}>{skill.value}</span>}
-                        <div className={`p-1 w-[${skill.value}0%] bg-app-base-primary rounded-lg`}></div>
+                        <div style={{width: `${skill.value}0%`}} className={`p-1 bg-app-base-primary rounded-lg`}></div>
                     </div> 
                     <span className='float-right block text-gray-400'>10</span>
-               </div></>)
+               </div></div>)
         }))
+        setEditionSkills(applicantData.skills)
+        
+        const imgBlob:any = await getImgURL(API_SERVER+`/uploads/${applicant.picture}`)
+        let fileName = 'dejavu.png'
+        let file = new File([imgBlob], fileName, {type:"image/png", lastModified:new Date().getTime()})
+        let container = new DataTransfer()
+        container.items.add(file)
+        if(refInputImage.current != null){
+            setFormImgSrc(API_SERVER+'/uploads/'+applicant.picture)
+            refInputImage.current.files = container.files
+        }
+
     }
 
+    async function getImgURL(url: string){
+        /* var xhr = new XMLHttpRequest()
+        xhr.withCredentials = true;
+        xhr.onload = function() {
+          callback(xhr.response)
+        }
+        xhr.open('GET', url)
+        xhr.responseType = 'blob'
+        xhr.send() */
+        const res = await fetch(url, {credentials: 'include'})
+        //callback(await res.blob())
+        return await res.blob()
+    }
+
+    async function deleteApplicant(event: any, applicant: string){
+        event.preventDefault()
+        const res = await fetch(API_SERVER+`/api/applicant/delete/ref?id=${applicant}`, {credentials: 'include'})
+        if(!res.ok){
+            setControlsApplicantReturn('Falha ao deletar candidato')
+            return
+        }
+
+        setControlsApplicantReturn('Candidato deletado')
+
+    } 
+
     const formViwerContent = 
-        <Form className='pb-5 overflow-auto w-11/12 h-[550px] s400:h-[700px] md:h-fit flex flex-col gap-2 text-left sm:items-start m-5 font-Roboto text-label-primary' method='post' encType="multipart/form-data">
+        <Form className='pb-5 overflow-auto w-11/12 h-[550px] s400:h-[700px] md:h-fit flex flex-col gap-2 text-left sm:items-start m-5 font-Roboto text-label-primary'>
                     <img className='self-center sm:hidden w-25 h-25 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ViwerFormData.picture} alt="" placeholder=''/>
                     <h3 className='font-bold text-title-primary text-center'>{ViwerFormData.name}</h3>
                     <label className='text-sm' htmlFor="company_name">Tags para esse candidato</label>
@@ -247,13 +317,15 @@ export default function ApplicantsPage(){
                     </div>
                     <label className='text-sm' htmlFor="company_name">Contato</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
-                        <div className='grid grid-flow-col grid-rows-3 w-64'>
+                        <div className='grid grid-flow-col grid-rows-4 w-64'>
                             <i className="fa-brands fa-linkedin-in"></i> 
                             <i className="fa-regular fa-envelope"></i>
                             <i className="fa-solid fa-address-book"></i>
+                            <i className="fa fa-github-alt" aria-hidden="true"></i>
                             <Link to={'/'} className='underline'>{ViwerFormData.contact.linkedin}</Link>
                             <Link to={'/'} className='underline'>{ViwerFormData.contact.email}</Link>
                             <Link to={'/'} className='underline'>{ViwerFormData.contact.phone}</Link>
+                            <Link to={'/'} className='underline'>{ViwerFormData.contact.github}</Link>
                         </div>
                     </div>
                     <label className='text-sm' htmlFor="company_name">Habilidades</label> 
@@ -265,19 +337,26 @@ export default function ApplicantsPage(){
                         <i className="fa-solid fa-globe"></i>
                         <Link to={'/'} className='ml-2 underline'>{ViwerFormData.portfolio}</Link>
                     </div>
-                    <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Editar</button>
+                    <label className='text-sm text-alert' htmlFor="">Controles</label> 
+                    <div className='flex flex-col gap-3 w-full border-[1px] border-alert/60 p-2 rounded-md font-Roboto text-start'>
+                        <button className='text-start text-app-base-primary text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Aprovar para próxima etapa</button>
+                        <button className='text-start text-yellow-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Mover para etapa anterior</button>
+                        <button className='text-start text-blue-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faEye} /> Marcar como visualizado</button>
+                        <button onClick={(event)=>deleteApplicant(event, ViwerFormData._id)} className='text-start text-alert text-sm hover:underline'><FontAwesomeIcon className='' icon={faTrash} /> Deletar candidato</button>
+                        {ControlsApplicantReturn}
+                    </div>
+                    <button onClick={(event)=>toggleEditionForm(event)} className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Editar</button>
                 </Form>
 
 
-    const [Skills, setSkills] = useState([{'skill':'React','value':0}])
     const [SkillsEl, setSkillsEl] = useState([
-        <>
+        <div key={0} className='grid grid-flow-row grid-cols-2 gap-3'>
             <input className='w-1/2 border border-black/20 px-3' type='text' placeholder='' />
             <div className=''>
                 <span>{Skills[0].value}</span>
                 <input onChange={(event)=>handleSkillChange(event, 0)} type='range' value={Skills[0].value} max={10} min={0} />
             </div>
-        </>
+        </div>
     ]
     )
 
@@ -298,17 +377,47 @@ export default function ApplicantsPage(){
         })
     }
 
+    function handleEditionSkillChange(event:any, skillid:number){
+        setEditionSkills((prevSkills:any)=>{
+            return prevSkills.map((skill:any, index:number)=>{
+               if(index == skillid){
+                    const targetName = event.target.name as string
+                    if(targetName.startsWith('skill')){
+                        return {skill: event.target.value as string, value: skill.value as number}
+                    }else{
+                        return {skill: skill.skill as string, value: parseInt(event.target.value) as number}
+                    }
+                }
+
+                return skill
+            }) 
+        })
+    }
+
     function createSkillField(event:any){
         event.preventDefault()
-        setSkills(prevSkills=>[...prevSkills, {'skill':'new','value':0}])
+        if(event.target.name != 'edition'){
+            setSkills(prevSkills=>[...prevSkills, {'skill':'new','value':0}])
+        }else{
+            setEditionSkills(prevSkills=>[...prevSkills, {'skill':'','value':0}])
+        }
     }
 
     function deleteSkillField(event:any){
         event.preventDefault()
-        setSkills(prevSkills=>{
-            let copy = prevSkills
-            return copy.slice(0, -1)
-        })
+       
+        if(event.target.name != 'edition'){
+            setSkills(prevSkills=>{
+                let copy = prevSkills
+                return copy.slice(0, -1)
+            })
+        }else{
+            setEditionSkills(prevSkills=>{
+                let copy = prevSkills
+                return copy.slice(0, -1)
+            })
+
+        }
     }
 
     function handleFormImgChange(event:any){
@@ -334,17 +443,32 @@ export default function ApplicantsPage(){
 
     useEffect(()=>{
         setSkillsEl(Skills.map((skill, index)=>{
-            return (<>
+            return (<div key={'skill'+index} className='grid grid-flow-row grid-cols-2 gap-3'>
                 <input key={index} name={`skill_${index}`} onChange={(event)=>handleSkillChange(event, index)} className='fadein w-full border border-black/20 px-2 text-center' type='text' placeholder='' />
                 <div key={index+1} className='fadein'>
                     <span>{skill.value}</span>
                     <input name={`value_${index}`} onChange={(event)=>handleSkillChange(event, index)} type='range' value={skill.value} max={10} min={0} />
                 </div>
-            </>)
+            </div>)
  
         }))
 
+        setEditionSkills(Skills)
     },[Skills])
+
+    useEffect(()=>{
+        setEditionSkillsEl(EditionSkills.map((skill, index)=>{
+            return (<div key={'skill-'+index} className='grid grid-flow-row grid-cols-2 gap-2 items-center'>
+                    <input name={`skill_${index}`} onChange={(event)=>handleEditionSkillChange(event, index)} className='fadein w-full border border-black/20 px-2 text-center' type='text' placeholder='' value={skill.skill} />
+                    <div className='fadein grid grid-flow-col grid-rows-2 w-full'>
+                        <span>{skill.value}</span>
+                        <input name={`value_${index}`} onChange={(event)=>handleEditionSkillChange(event, index)} type='range' value={skill.value} max={10} min={0} />
+                    </div>
+            </div>)
+ 
+        }))
+
+    },[EditionSkills])
 
     const formAdditionContent = 
         <>
@@ -371,12 +495,16 @@ export default function ApplicantsPage(){
                 </div>
             </div>
             <div className='gap-3 w-full border-[1px] border-label-secondary/20 p-2 rounded-md font-Roboto'>
-                <div className='w-full grid grid-flow-row grid-cols-2 gap-3'>
-                    <label className='text-sm'>Habilidade</label> 
-                    <label className='text-sm'>Nível</label>
+                <div className='w-full grid grid-flow-row grid-cols-1 gap-3'>
+                    <div className='grid grid-flow-row grid-cols-2 gap-3'>
+                        <label className='text-sm'>Habilidade</label> 
+                        <label className='text-sm'>Nível</label>
+                    </div>
                     {SkillsEl}
-                    <button disabled={SkillsEl.length<=1?true:false} className={SkillsEl.length<=1?'bg-alert/50':'bg-alert' + ' p-1 text-sm rounded-sm text-white'} onClick={deleteSkillField}>- Remover</button>
-                    <button disabled={SkillsEl.length>=10?true:false} className={SkillsEl.length>=10?'bg-app-base-primary/30':'bg-app-base-primary' + ' p-1 text-sm rounded-sm text-white'} onClick={createSkillField}>+ Adicionar</button>
+                    <div className='grid grid-flow-row grid-cols-2 gap-3'>
+                        <button disabled={SkillsEl.length<=1?true:false} className={SkillsEl.length<=1?'bg-alert/50':'bg-alert' + ' p-1 text-sm rounded-sm text-white'} onClick={deleteSkillField}>- Remover</button>
+                        <button disabled={SkillsEl.length>=10?true:false} className={SkillsEl.length>=10?'bg-app-base-primary/30':'bg-app-base-primary' + ' p-1 text-sm rounded-sm text-white'} onClick={createSkillField}>+ Adicionar</button>
+                    </div>
                 </div>
             </div>
             <label className='text-sm' htmlFor="portfolio">Portfólio/Trabalhos</label> 
@@ -384,6 +512,7 @@ export default function ApplicantsPage(){
                 <i className="fa-solid fa-globe"></i> 
                 <input name='portfolio' id='portfolio' className='ml-2 w-5/6 border border-black/20 px-3' type='text' placeholder='https://meuportfolio.com' />
             </div>
+            <input type='hidden' name='formtype' value={'addition'} />
             {actionReturn && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{actionReturn==='200'?'Novo candidato registrado':'⚠️ ' + actionReturn}</span>}
             <button className="my-3 w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Adicionar</button> 
         </Form>
@@ -409,6 +538,57 @@ export default function ApplicantsPage(){
     useEffect(()=>{
         getApplicants()
     },[])
+
+    const formEditionContent = 
+        <>
+        <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary max-h-[500px] overflow-auto' method='post' encType="multipart/form-data">
+            <h1 className='w-full uppercase text-center text-app-base-primary font-Roboto font-bold'>Edição manual de candidato</h1>
+            <label className='self-center cursor-pointer' htmlFor='image'><img className='w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-md self-center' src={FormImgSrc} alt="" placeholder=''/></label>
+            <input ref={refInputImage} className='hidden' onChange={handleFormImgChange} id={'image'} type="file" accept=".jpg, .png, .jpeg" name={'image'} />
+            <span className='text-[10px] text-label-primary/60 mx-auto' >Clique para adicionar/trocar imagem</span>
+            <label className='text-sm' htmlFor="name">Nome</label> 
+            <input className='w-full p-2 rounded-full border-[1px] shadow-md shadow-black/20 text-center sm:text-left sm:rounded-md sm:w-full' type="text" name="name" id="name" placeholder='Ex.: Julia Machado' defaultValue={ViwerFormData.name}/>
+            <label className='text-sm' htmlFor="aboutme">Sobre mim</label> 
+            <textarea className='w-full min-h-[200px] resize-none p-1 s320:p-4 border-[1px] border-black/20 rounded-md shadow-md shadow-black/20 sm:rounded-md' name="aboutme" id="aboutme" cols={30} rows={5} maxLength={450}  placeholder='Descrição sobre o candidato...' defaultValue={ViwerFormData.aboutme}></textarea>
+            <label className='text-sm'>Contato</label>
+            <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
+                <div className='w-full grid grid-flow-col grid-rows-4 gap-3'>
+                    <i className="fa-brands fa-linkedin-in"></i> 
+                    <i className="fa-regular fa-envelope"></i>
+                    <i className="fa-solid fa-address-book"></i>
+                    <i className="fa fa-github-alt" aria-hidden="true"></i>
+                    <input className='w-full border border-black/20 px-3' name='linkedin' type='text' placeholder='Linkedin' defaultValue={ViwerFormData.contact.linkedin}/>
+                    <input className='w-full border border-black/20 px-3' name='email' type='email' placeholder='Email' defaultValue={ViwerFormData.contact.email} />
+                    <input className='w-full border border-black/20 px-3' name='phone' type='tel' placeholder='Número de telefone' defaultValue={ViwerFormData.contact.phone}/>
+                    <input className='w-full border border-black/20 px-3' name='github' type='text' placeholder='Github' defaultValue={ViwerFormData.contact.github}/>
+                </div>
+            </div>
+            <div className='gap-3 w-full border-[1px] border-label-secondary/20 p-2 rounded-md font-Roboto'>
+                <div className='w-full grid grid-flow-row grid-cols-1 gap-3'>
+                    <div className='grid grid-flow-row grid-cols-2'>
+                        <label className='text-sm'>Habilidade</label> 
+                        <label className='text-sm'>Nível</label>
+                    </div>
+                    {EditionSkillsEl}
+                    <div className='grid grid-flow-row grid-cols-2 gap-3'>
+                        <button name='edition' disabled={EditionSkillsEl.length<=1?true:false} className={EditionSkillsEl.length<=1?'bg-alert/50':'bg-alert' + ' p-1 text-sm rounded-sm text-white'} onClick={deleteSkillField}>- Remover</button>
+                        <button name='edition' disabled={EditionSkillsEl.length>=10?true:false} className={EditionSkillsEl.length>=10?'bg-app-base-primary/30':'bg-app-base-primary' + ' p-1 text-sm rounded-sm text-white'} onClick={createSkillField}>+ Adicionar</button>
+                    </div>
+                </div>
+            </div>
+            <label className='text-sm' htmlFor="portfolio">Portfólio/Trabalhos</label> 
+            <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md font-Roboto text-start'>
+                <i className="fa-solid fa-globe"></i> 
+                <input name='portfolio' id='portfolio' className='ml-2 w-5/6 border border-black/20 px-3' type='text' placeholder='https://meuportfolio.com' defaultValue={ViwerFormData.portfolio} />
+            </div>
+            <input type='hidden' name='formtype' value={'edition'} />
+            <input type='hidden' name='applicant' value={ViwerFormData._id} />
+            {actionReturn && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{actionReturn==='200'?'Edição realizada':'⚠️ ' + actionReturn}</span>}
+            <button className="my-3 w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Salvar edição</button> 
+        </Form>
+        </>
+
+
 
     function buildApplicantsElements(applicants: any){
         setApplicantsEl(applicants.map((applicant: any, index:any)=>{
@@ -437,13 +617,9 @@ export default function ApplicantsPage(){
 
     const content = 
     <>
-    { isFormAdditionVisible && 
-         <FormContentPage toggleForm={toggleAdditionForm} formContent={formAdditionContent} isFormVisible={isFormAdditionVisible}/>
-    }
-
-    { isFormViwerVisible && 
-                <FormContentPage toggleForm={()=>toggleViwerForm(null)} formProfileImage={ViwerFormData.picture} formContent={formViwerContent} isFormVisible={isFormViwerVisible}/>
-    }
+    <FormContentPage toggleForm={()=>toggleEditionForm()} formContent={formEditionContent} isFormVisible={isFormEditionVisible}/>
+    <FormContentPage toggleForm={toggleAdditionForm} formContent={formAdditionContent} isFormVisible={isFormAdditionVisible}/>
+    <FormContentPage toggleForm={()=>toggleViwerForm(null)} formProfileImage={ViwerFormData.picture} formContent={formViwerContent} isFormVisible={isFormViwerVisible}/>
 
     <ul className="flex flex-col flex-nowrap :w-full ">
         {ApplicantsEl[0]?ApplicantsEl:

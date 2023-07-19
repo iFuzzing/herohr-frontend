@@ -1,4 +1,4 @@
-import {Link, redirect, useActionData} from 'react-router-dom'
+import {Link, redirect, useActionData, useNavigation} from 'react-router-dom'
 
 import ImageBgSky from '../assets/images/login/bg-sky-login-SE.png'
 import ImageBlob from '../assets/images/login/bg-blob-login-SE.png'
@@ -75,7 +75,8 @@ export async function action({request}:{request: Request}){
 export default function LoginPage(){
 
     const actionReturn: string = useActionData() as string 
-    
+    const formStatus = useNavigation()
+
     return(
     <main style={{'--image-url': `url(${ImageBgSky})`} as React.CSSProperties} className='bg-slate-200 w-screen h-screen bg-[image:var(--image-url)] bg-cover overflow-hidden sm:bg-none sm:flex sm:items-center'>
         <div className='sm:bg-white max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
@@ -116,7 +117,7 @@ export default function LoginPage(){
                                 </p>
                             </div>
                         }
-                        <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Entrar <i className="fa fa-sign-in ext-base text-white/95" aria-hidden="true"></i></button>
+                            <button className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">{formStatus.state == 'submitting'?<i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>:'Entrar'} <i className="fa fa-sign-in ext-base text-white/95" aria-hidden="true"></i></button>
                     </Form>
                     <button className='absolute bottom-0 right-0 cursor-default sm:hidden'>
                         <Link className="cursor-pointer w-10 h-12 rotate-45 absolute right-3 bottom-3" to='/singup'></Link>
