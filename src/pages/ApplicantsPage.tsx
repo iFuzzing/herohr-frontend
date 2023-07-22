@@ -303,6 +303,34 @@ export default function ApplicantsPage(){
 
     } 
 
+    async function nextStepApplicant(event: any, applicant: string){
+        event.preventDefault()
+        const res = await fetch(API_SERVER+`/api/applicant/nextstep?applicant=${applicant}&&job=${jobId}`, {credentials: 'include'})
+        if(!res.ok){
+            setControlsApplicantReturn('Não foi possível mover o candidato para a próxima etapa')
+            return
+        }
+
+
+        console.log(await res.text())
+        setControlsApplicantReturn('Candidato foi aprovado para a próxima etapa')
+        
+    }
+
+    async function prevStepApplicant(event: any, applicant: string){
+        event.preventDefault()
+        const res = await fetch(API_SERVER+`/api/applicant/prevstep?applicant=${applicant}&&job=${jobId}`, {credentials: 'include'})
+        if(!res.ok){
+            setControlsApplicantReturn('Não foi possível mover o candidato para a etapa anterior')
+            return
+        }
+
+
+        console.log(await res.text())
+        setControlsApplicantReturn('Candidato voltou uma etapa')
+        
+    }
+
     const formViwerContent = 
         <Form className='pb-5 overflow-auto w-11/12 h-[550px] s400:h-[700px] md:h-fit flex flex-col gap-2 text-left sm:items-start m-5 font-Roboto text-label-primary'>
                     <img className='self-center sm:hidden w-25 h-25 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ViwerFormData.picture} alt="" placeholder=''/>
@@ -339,8 +367,8 @@ export default function ApplicantsPage(){
                     </div>
                     <label className='text-sm text-alert' htmlFor="">Controles</label> 
                     <div className='flex flex-col gap-3 w-full border-[1px] border-alert/60 p-2 rounded-md font-Roboto text-start'>
-                        <button className='text-start text-app-base-primary text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Aprovar para próxima etapa</button>
-                        <button className='text-start text-yellow-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Mover para etapa anterior</button>
+                        <button onClick={(event)=> nextStepApplicant(event, ViwerFormData._id.toString())} className='text-start text-app-base-primary text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Aprovar para próxima etapa</button>
+                        <button onClick={(event)=> prevStepApplicant(event, ViwerFormData._id.toString())} className='text-start text-yellow-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Mover para etapa anterior</button>
                         <button className='text-start text-blue-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faEye} /> Marcar como visualizado</button>
                         <button onClick={(event)=>deleteApplicant(event, ViwerFormData._id)} className='text-start text-alert text-sm hover:underline'><FontAwesomeIcon className='' icon={faTrash} /> Deletar candidato</button>
                         {ControlsApplicantReturn}
@@ -625,7 +653,7 @@ export default function ApplicantsPage(){
         {ApplicantsEl[0]?ApplicantsEl:
             <div className='p-14 flex flex-col flex-center w-full text-center font-Roboto'>
                 <h1 className='font-medium'>Nenhum candidato registrado ou presente nessa etapa</h1>
-                <h3 className='text-sm text-label-secondary'>(Se não registrado, você pode adicionar manualmente ou gerar um link para que os candidatos façam isso sozinhos. Eles aparecerão na etapa 1 em seguida)</h3>
+                <h3 className='text-sm text-label-secondary'>(Se não registrado, você pode adicionar manualmente ou gerar um link para que os candidatos façam isso sozinhos. Eles aparecerão na # Etapa 1)</h3>
                 <img className='w-56 self-center' src={ImageWaitingApplicants} alt='Companies waiting content img'/>
             </div>
         }
