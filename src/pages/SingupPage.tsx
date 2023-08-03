@@ -39,7 +39,7 @@ export async function action({request}: { request: Request}){
         return 'Nome e sobrenome deve ter no máximo 32 caracteres'
     }
 
-    const res = await fetch(API_SERVER+'http://localhost:3500/api/recruiter/singup',
+    const res = await fetch(API_SERVER+'/api/recruiter/singup',
         {
             method: 'post',
             headers: {

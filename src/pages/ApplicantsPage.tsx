@@ -1,12 +1,12 @@
 import ContentPage from '../components/ContentPage'
-import {Link, Form, redirect, useActionData, useSearchParams} from 'react-router-dom'
+import {Link, Form, redirect, useActionData, useSearchParams, useNavigation} from 'react-router-dom'
 import {useEffect, useRef, useState} from 'react'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
 import ImageWaitingApplicants from '../assets/images/applicants/applicants_idle.svg'
 import FormContentPage from '../components/FormContentPage'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faFlag, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { API_SERVER, isEmail, isRecruiterAuthenticated } from '../utils/utils'
+import { faClose, faEye, faFlag, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { API_SERVER, isEmail, isHexColor, isRecruiterAuthenticated } from '../utils/utils'
 
 export async function loader({request}:{request: Request}){
     if(!await isRecruiterAuthenticated()){
@@ -34,6 +34,11 @@ export async function loader({request}:{request: Request}){
 type SkillsType = {
     skill: string,
     value: string
+}
+
+type TagsType = {
+    tag: string,
+    color: string
 }
 
 export async function action({request}:{request: Request}){
@@ -169,6 +174,10 @@ export default function ApplicantsPage(){
     const [isFormEditionVisible, setIsFormEditionVisible] = useState(false)
     const [FormImgSrc, setFormImgSrc] = useState(ImageFormPlaceHolder)
     const [ApplicantsEl, setApplicantsEl] = useState([] as JSX.Element[]) 
+
+    const [InputTag, setInputTag] = useState({tag: '', color: ''} as TagsType)
+    const [Tags, setTags] = useState([{}] as TagsType[])
+    const [TagsEl, setTagsEl] = useState([] as JSX.Element[])
     const [ViwerFormData, setViwerFormData] = useState(
         {
             _id: '',
@@ -194,11 +203,17 @@ export default function ApplicantsPage(){
     const [EditionSkills, setEditionSkills] = useState(Skills)
 
     const refInputImage = useRef<any>(null)
+    const refInputImageEdit = useRef<any>(null)
 
-    const actionReturn = useActionData() as string
+    const [FormStatus, setFormStatus] = useState('idle')
+    const [actionReturn, setActionReturn] = useState('')
+    const actreturn = useActionData() as string
     const [searchParams] = useSearchParams()
     const jobId = searchParams.get('job')
     const stepId = searchParams.get('step')
+
+    const navigationStatus = useNavigation()
+    const navState = navigationStatus.state
 
     function toggleAdditionForm(){
         setFormImgSrc(ImageFormPlaceHolder)
@@ -215,7 +230,7 @@ export default function ApplicantsPage(){
         setIsFormViwerVisible((prevIsFormViwerVisible)=> !prevIsFormViwerVisible)
     }
     
-    function toggleEditionForm(event: any = undefined){
+    async function toggleEditionForm(event: any = undefined){
         if(event)
             event.preventDefault()
 
@@ -270,9 +285,10 @@ export default function ApplicantsPage(){
         let file = new File([imgBlob], fileName, {type:"image/png", lastModified:new Date().getTime()})
         let container = new DataTransfer()
         container.items.add(file)
-        if(refInputImage.current != null){
+        if(refInputImage.current != null && refInputImageEdit != null){
             setFormImgSrc(API_SERVER+'/uploads/'+applicant.picture)
             refInputImage.current.files = container.files
+            refInputImageEdit.current.files = container.files
         }
 
     }
@@ -300,7 +316,7 @@ export default function ApplicantsPage(){
         }
 
         setControlsApplicantReturn('Candidato deletado')
-
+        getApplicants()
     } 
 
     async function nextStepApplicant(event: any, applicant: string){
@@ -331,14 +347,60 @@ export default function ApplicantsPage(){
         
     }
 
+    async function addTag(event: any){
+        event.preventDefault()
+
+        if(InputTag.tag.length > 0 && InputTag.tag.length <= 32 && InputTag.color.length == 7 && !Tags.find((tag) => tag.tag == InputTag.tag) && Tags.length <= 10 && await isHexColor(InputTag.color))
+            setTags(prevTags=>[...prevTags, InputTag])
+
+    }
+
+    async function addTagFromDefaults(event: any, tag: string, color: string){ 
+        event.preventDefault()
+        if(!Tags.find((cTag) => cTag.tag == tag) && Tags.length <= 10 && await isHexColor(color))
+            setTags(prevTags=>[...prevTags, {tag: tag, color: color}])
+    }
+
+    async function removeTag(event: any, tag: string){
+        event.preventDefault()
+        setTags(prevTags=>prevTags.filter(ptag=> ptag.tag != tag))
+    }
+
+    async function handleTagAction(event: any){
+        event.preventDefault()
+    }
+
+    useEffect(()=>{
+        setTagsEl(Tags.filter(tag => tag?.tag).map((tag, index)=>{
+            return (<button onClick={(event)=> handleTagAction(event)} key={index} style={{background: `${tag.color}`}} className='text-white w-fit p-2 rounded-full text-sm shadow shadow-black/50'>{tag.tag} | <button onClick={(event)=> removeTag(event, tag.tag)} className='text-alert hover:scale-110 '><FontAwesomeIcon className='' icon={faClose} /></button> </button>)
+        }))
+        setInputTag({tag: '', color: ''})
+    },[Tags])
+
+    async function handleTagInputs(event: any){
+        event.preventDefault()
+        setInputTag((prevInputTag: any)=>{
+            return {...prevInputTag, [event.target.name]: event.target.value}
+        })
+    }
+
     const formViwerContent = 
         <Form className='pb-5 overflow-auto w-11/12 h-[550px] s400:h-[700px] md:h-fit flex flex-col gap-2 text-left sm:items-start m-5 font-Roboto text-label-primary'>
-                    <img className='self-center sm:hidden w-25 h-25 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ViwerFormData.picture} alt="" placeholder=''/>
+                    <img className='self-center sm:hidden w-24 h-24 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-full' src={ViwerFormData.picture} alt="" placeholder=''/>
                     <h3 className='font-bold text-title-primary text-center'>{ViwerFormData.name}</h3>
-                    <label className='text-sm' htmlFor="company_name">Tags para esse candidato</label>
-                    <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
-                       <span className='text-gray-500 text-sm'>(Clique para definir tags)</span> 
+                    <label className='text-sm' htmlFor="company_name">Tags ativas para esse candidato</label>
+                    <div className='w-full flex flex-wrap gap-3 border-[1px] border-label-secondary/20 p-2 rounded-md justify-center'>
+                    {TagsEl[0]?TagsEl:'(Adicione uma tag)'}
                     </div>
+                    <label className='text-sm' htmlFor="company_name">Clique em uma tag abaixo para adicionar ao candidato ou crie a sua própria</label>
+                    <div className='w-full flex flex-wrap gap-3 border-[1px] border-label-secondary/20 p-2 rounded-md justify-center'>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Habilidoso(a)','#1aabc4')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-sky-600'>Habilidoso(a)</button>
+                    </div>
+                    <div className='flex flex-row gap-3 w-full px-3 justify-center'>
+                <input onChange={handleTagInputs} className='w-[120px] sm:w-auto self-center border border-black/20 rounded-md p-2' type='text' name='tag' placeholder='Bom portfólio' value={InputTag.tag}></input>
+                <input onChange={handleTagInputs} className='w-[120px] sm:w-auto self-center border border-black/20 rounded-md p-2' type='text' name='color' placeholder='#000000' value={InputTag.color} ></input>
+                    </div>
+                    <button onClick={(event)=>addTag(event)} className='bg-app-base-primary text-white rounded-sm w-fit self-center text-sm p-2'>Adicionar tag</button>
                     <label className='text-sm' htmlFor="company_name">Sobre mim</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
                         <p className='overflow-auto h-24'>{ViwerFormData.aboutme}</p>
@@ -371,7 +433,7 @@ export default function ApplicantsPage(){
                         <button onClick={(event)=> prevStepApplicant(event, ViwerFormData._id.toString())} className='text-start text-yellow-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faFlag} /> Mover para etapa anterior</button>
                         <button className='text-start text-blue-500 text-sm font-bold hover:underline'><FontAwesomeIcon className='' icon={faEye} /> Marcar como visualizado</button>
                         <button onClick={(event)=>deleteApplicant(event, ViwerFormData._id)} className='text-start text-alert text-sm hover:underline'><FontAwesomeIcon className='' icon={faTrash} /> Deletar candidato</button>
-                        {ControlsApplicantReturn}
+                        {ControlsApplicantReturn && <span className={'fadein w-full p-1 text-white text-sm text-center bg-app-base-primary'}>{ControlsApplicantReturn}</span>}
                     </div>
                     <button onClick={(event)=>toggleEditionForm(event)} className="w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Editar</button>
                 </Form>
@@ -469,6 +531,7 @@ export default function ApplicantsPage(){
         reader.readAsDataURL(event.target.files[0])
     }
 
+
     useEffect(()=>{
         setSkillsEl(Skills.map((skill, index)=>{
             return (<div key={'skill'+index} className='grid grid-flow-row grid-cols-2 gap-3'>
@@ -498,12 +561,37 @@ export default function ApplicantsPage(){
 
     },[EditionSkills])
 
+    useEffect(()=>{
+        if(FormStatus === 'submitting'){
+            if(actreturn === '200'){
+                getApplicants()
+                setTimeout(()=>{setActionReturn('')},2000)
+            }
+        }
+        setFormStatus(navigationStatus?.state)
+        setActionReturn(actreturn)
+    }, [navState])
+
+    let textBtnAdd: string = ''
+    if(FormStatus === 'idle'){
+            textBtnAdd = 'Adicionar'
+    }
+    if(FormStatus === 'submitting')
+        textBtnAdd = 'Enviando'
+  
+    let textResponse: string = ''
+    if(actionReturn == '200')
+        textResponse = '✔️ Novo candidato cadastrado'
+    else if(actionReturn){
+        textResponse = '⚠️ ' + actionReturn 
+    }
+    
     const formAdditionContent = 
         <>
         <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary max-h-[500px] overflow-auto' method='post' encType="multipart/form-data">
             <h1 className='w-full uppercase text-center text-app-base-primary font-Roboto font-bold'>Cadastro manual de candidato</h1>
-            <label className='self-center cursor-pointer' htmlFor='image'><img className='w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-md self-center' src={FormImgSrc} alt="" placeholder=''/></label>
-            <input className='hidden' onChange={handleFormImgChange} id={'image'} type="file" accept=".jpg, .png, .jpeg" name={'image'} />
+            <label className='self-center cursor-pointer' htmlFor='image_add'><img className='w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-md self-center' src={FormImgSrc} alt="" placeholder=''/></label>
+            <input ref={refInputImage} className='hidden' onChange={handleFormImgChange} id={'image_add'} type="file" accept=".jpg, .png, .jpeg" name={'image'} />
             <span className='text-[10px] text-label-primary/60 mx-auto' >Clique para adicionar/trocar imagem</span>
             <label className='text-sm' htmlFor="name">Nome</label> 
             <input className='w-full p-2 rounded-full border-[1px] shadow-md shadow-black/20 text-center sm:text-left sm:rounded-md sm:w-full' type="text" name="name" id="name" placeholder='Ex.: Julia Machado'/>
@@ -541,8 +629,8 @@ export default function ApplicantsPage(){
                 <input name='portfolio' id='portfolio' className='ml-2 w-5/6 border border-black/20 px-3' type='text' placeholder='https://meuportfolio.com' />
             </div>
             <input type='hidden' name='formtype' value={'addition'} />
-            {actionReturn && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{actionReturn==='200'?'Novo candidato registrado':'⚠️ ' + actionReturn}</span>}
-            <button className="my-3 w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Adicionar</button> 
+            {textResponse  && actreturn && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{textResponse}</span>}
+            <button className="my-3 w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">{textBtnAdd}</button> 
         </Form>
         </>
 
@@ -567,12 +655,13 @@ export default function ApplicantsPage(){
         getApplicants()
     },[])
 
+
     const formEditionContent = 
         <>
         <Form className='w-11/12 flex flex-col gap-3 items-center sm:items-start m-5 font-Roboto text-label-primary max-h-[500px] overflow-auto' method='post' encType="multipart/form-data">
             <h1 className='w-full uppercase text-center text-app-base-primary font-Roboto font-bold'>Edição manual de candidato</h1>
-            <label className='self-center cursor-pointer' htmlFor='image'><img className='w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-md self-center' src={FormImgSrc} alt="" placeholder=''/></label>
-            <input ref={refInputImage} className='hidden' onChange={handleFormImgChange} id={'image'} type="file" accept=".jpg, .png, .jpeg" name={'image'} />
+            <label className='self-center cursor-pointer' htmlFor='image_edit'><img className='w-20 h-20 border-[1px] border-active-primary/30 shadow-md shadow-black/20 rounded-md self-center' src={FormImgSrc} alt="" placeholder=''/></label>
+            <input ref={refInputImageEdit} className='hidden' onChange={handleFormImgChange} id={'image_edit'} type="file" accept=".jpg, .png, .jpeg" name={'image'} />
             <span className='text-[10px] text-label-primary/60 mx-auto' >Clique para adicionar/trocar imagem</span>
             <label className='text-sm' htmlFor="name">Nome</label> 
             <input className='w-full p-2 rounded-full border-[1px] shadow-md shadow-black/20 text-center sm:text-left sm:rounded-md sm:w-full' type="text" name="name" id="name" placeholder='Ex.: Julia Machado' defaultValue={ViwerFormData.name}/>
@@ -611,7 +700,7 @@ export default function ApplicantsPage(){
             </div>
             <input type='hidden' name='formtype' value={'edition'} />
             <input type='hidden' name='applicant' value={ViwerFormData._id} />
-            {actionReturn && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{actionReturn==='200'?'Edição realizada':'⚠️ ' + actionReturn}</span>}
+            {textResponse && <span className={'fadein w-full p-2 text-white text-sm '+(actionReturn=='200'?'bg-green-400':'bg-alert/70')} >{actionReturn==='200'?textResponse:'⚠️ ' + textResponse}</span>}
             <button className="my-3 w-44 mt-5 self-center font-Roboto font-medium text-sm shadow-lg shadow-black/30 text-white p-3 rounded-full bg-gradient-to-r from-active-primary to-blue-gradient-value uppercase duration-300 hover:hue-rotate-[45deg]">Salvar edição</button> 
         </Form>
         </>
@@ -647,7 +736,7 @@ export default function ApplicantsPage(){
     <>
     <FormContentPage toggleForm={()=>toggleEditionForm()} formContent={formEditionContent} isFormVisible={isFormEditionVisible}/>
     <FormContentPage toggleForm={toggleAdditionForm} formContent={formAdditionContent} isFormVisible={isFormAdditionVisible}/>
-    <FormContentPage toggleForm={()=>toggleViwerForm(null)} formProfileImage={ViwerFormData.picture} formContent={formViwerContent} isFormVisible={isFormViwerVisible}/>
+    <FormContentPage toggleForm={()=>toggleViwerForm(null)} formProfileImage={ViwerFormData.picture} formContent={formViwerContent} isFormVisible={isFormViwerVisible} isViwerForm={true}/>
 
     <ul className="flex flex-col flex-nowrap :w-full ">
         {ApplicantsEl[0]?ApplicantsEl:

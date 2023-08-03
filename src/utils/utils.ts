@@ -1,7 +1,6 @@
 //export const API_SERVER = 'http://192.168.2.52:3500'
 export const API_SERVER = 'http://localhost:3500'
 
-
 export const isRecruiterAuthenticated = async()=>{	
 	const res = await fetch(API_SERVER+'/api/recruiter/auth', {credentials: 'include'})
 	if(res.ok){
@@ -9,6 +8,12 @@ export const isRecruiterAuthenticated = async()=>{
 	}
 	
 	return false
+}
+
+export const isHexColor = async(input: string)=>{
+  const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+
+  return hexColorRegex.test(input);
 }
 
 /* Créditos para fazlulkarimweb https://github.com/fazlulkarimweb/string-sanitizer */

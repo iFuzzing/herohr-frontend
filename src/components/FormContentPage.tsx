@@ -7,6 +7,7 @@ interface Props{
     title?: string;
     formContent: any;
     isFormVisible?: boolean;
+    isViwerForm?: boolean;
 }
 
 export default function FormContentPage(props:Props){
@@ -22,8 +23,8 @@ export default function FormContentPage(props:Props){
                         <div className="flex flex-col gap-3 items-center sm:mt-[10%]">
                         {props.formProfileImage &&
                         <>
-                                    <label htmlFor='image' ><img className='hidden sm:mt-[10%] sm:block w-24 h-24 border-[2px] border-active-primary/30 shadow-md shadow-black/20 cursor-pointer' src={props.formProfileImage} alt="" placeholder=''/></label>
-                            <span className='hidden sm:block text-[10px] text-label-primary/60' >Clique para adicionar/trocar imagem</span>
+                            <label htmlFor='image' ><img className='hidden sm:mt-[10%] sm:block w-24 h-24 border-[2px] border-active-primary/30 shadow-md shadow-black/20 cursor-pointer' src={props.formProfileImage} alt="" placeholder=''/></label>
+                            { !props.isViwerForm && <span className='hidden sm:block text-[10px] text-label-primary/60' >Clique para adicionar/trocar imagem</span>}
                         </>
                         }
                         </div>
