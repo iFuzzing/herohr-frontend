@@ -74,12 +74,11 @@ export default function SingupPage(){
     const actionReturn: string = useActionData() as string
     return(
         <main className='bg-slate-200 w-screen h-screen overflow-hidden sm:bg-none sm:flex sm:items-center'>
-        <div className='sm:bg-white max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
+        <div className='sm:bg-white overflow-hidden max-w-5xl sm:w-11/12 sm:flex sm:flex-row sm:mx-auto sm:items-center sm:h-5/6 sm:shadow-lg sm:shadow-black/20 sm:rounded-md sm:border-2 sm:border-active-primary'>
             <div className="sm:w-1/2 sm:relative sm:bg-gradient-to-b sm:from-active-primary sm:h-full sm:justify-around sm:flex sm:flex-col">
                 <div className="relative sm:w-full w-screen h-[290px] flex flex-wrap justify-center py-7">
                     <img src={ImageHeroSingup} alt="Hero image"  className="absolute w-full z-[5]" />
                 </div>
-                <p className='hidden sm:block font-Roboto font-normal text-xs text-label-secondary p-6 relative z-20'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus fuga nesciunt harum temporibus velit nostrum qui natus voluptatibus impedit veritatis sit id asperiores sed, sint perferendis quo, sapiente hic quisquam.</p>
             </div>
             <div className="sm:hidden bg-title-primary fixed w-screen h-4/5 bottom-0 z-0"></div>
             <div className="sm:w-1/2">

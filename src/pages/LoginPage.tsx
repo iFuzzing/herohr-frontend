@@ -86,7 +86,6 @@ export default function LoginPage(){
                     <img src={ImageStars} alt="Stars image"  className="z-10 absolute w-[320px] h-[280]" />
                     <img src={ImageBlob} alt="Blob image"  className="z-0 absolute w-[262px] h-[250px]" />
                 </div>
-                <p className='hidden sm:block font-Roboto font-normal text-xs text-label-secondary p-6'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus fuga nesciunt harum temporibus velit nostrum qui natus voluptatibus impedit veritatis sit id asperiores sed, sint perferendis quo, sapiente hic quisquam.</p>
             </div>
             <div className="sm:w-1/2">
                 <div className="text-center">

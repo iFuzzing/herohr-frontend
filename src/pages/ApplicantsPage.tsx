@@ -1,5 +1,5 @@
 import ContentPage from '../components/ContentPage'
-import {Link, Form, redirect, useActionData, useSearchParams, useNavigation} from 'react-router-dom'
+import {Link, Form, redirect, useActionData, useSearchParams, useNavigation } from 'react-router-dom'
 import {useEffect, useRef, useState} from 'react'
 import ImageFormPlaceHolder from '../assets/images/companies/form-placeholder.png'
 import ImageWaitingApplicants from '../assets/images/applicants/applicants_idle.svg'
@@ -46,6 +46,7 @@ export async function action({request}:{request: Request}){
     
     const params = new URL(request.url).searchParams
     const jobId = params.get('job') as string
+    const company_id = params.get('company') as string
 
     if(typeof(dataForm.aboutme) == 'undefined' || typeof(dataForm.email) == 'undefined' || typeof(dataForm.github) == 'undefined' || typeof(dataForm.image) == 'undefined' || typeof(dataForm.name) == 'undefined' || typeof(dataForm.phone) == 'undefined' || typeof(dataForm.portfolio) == 'undefined' || typeof(dataForm.skill_0) == 'undefined' ){
         return 'O formulário precisa ser preenchido corretamente'
@@ -142,6 +143,7 @@ export async function action({request}:{request: Request}){
     bodyData.append('image', image)
     bodyData.append('skills', JSON.stringify(skills))
     bodyData.append('job', jobId)
+    bodyData.append('company_id', company_id)
 
     let res
     if(!formType || formType != 'edition'){
@@ -178,24 +180,26 @@ export default function ApplicantsPage(){
     const [InputTag, setInputTag] = useState({tag: '', color: ''} as TagsType)
     const [Tags, setTags] = useState([{}] as TagsType[])
     const [TagsEl, setTagsEl] = useState([] as JSX.Element[])
-    const [ViwerFormData, setViwerFormData] = useState(
-        {
-            _id: '',
-            picture: ImageFormPlaceHolder as string,
-            name: '',
-            aboutme: '',
-            contact: {
-                linkedin: '',
-                email: '',
-                phone: '',
-                github: ''
-            },
-            skills:[
-                {skill:'',value: 0}
-            ],
-            portfolio: ''
-        }
-    )
+    const [TagLoading, setTagLoading] = useState('')
+
+    const defaultViewFormData =         {
+        _id: '',
+        picture: ImageFormPlaceHolder as string,
+        name: '',
+        aboutme: '',
+        contact: {
+            linkedin: '',
+            email: '',
+            phone: '',
+            github: ''
+        },
+        skills:[
+            {skill:'',value: 0}
+        ],
+        portfolio: ''
+    }
+
+    const [ViwerFormData, setViwerFormData] = useState(defaultViewFormData)
     const [ViwerSkillsEl, setViwerSkillsEl] = useState([] as JSX.Element[])
     const [EditionSkillsEl, setEditionSkillsEl] = useState([] as JSX.Element[])
 
@@ -211,11 +215,16 @@ export default function ApplicantsPage(){
     const [searchParams] = useSearchParams()
     const jobId = searchParams.get('job')
     const stepId = searchParams.get('step')
+    const companyid = searchParams.get('company')
 
     const navigationStatus = useNavigation()
     const navState = navigationStatus.state
 
+
     function toggleAdditionForm(){
+       if(ViwerFormData._id != ''){
+            setViwerFormData(defaultViewFormData)
+       } 
         setFormImgSrc(ImageFormPlaceHolder)
         setIsFormAdditionVisible((prevIsFormVisible)=> !prevIsFormVisible)
     }
@@ -227,6 +236,7 @@ export default function ApplicantsPage(){
         if(applicant)
             getApplicantRef(applicant)
 
+        getApplicants()
         setIsFormViwerVisible((prevIsFormViwerVisible)=> !prevIsFormViwerVisible)
     }
     
@@ -279,7 +289,14 @@ export default function ApplicantsPage(){
                </div></div>)
         }))
         setEditionSkills(applicantData.skills)
-        
+       
+        const res = await fetch(API_SERVER+`/api/applicant/tags?applicant=${encodeURIComponent(applicant._id)}&company=${companyid}`, {credentials: 'include'})
+        if(!res.ok){
+            console.log('Falha ao obter as tags')
+        }
+      
+        setTags(await res.json())
+
         const imgBlob:any = await getImgURL(API_SERVER+`/uploads/${applicant.picture}`)
         let fileName = 'dejavu.png'
         let file = new File([imgBlob], fileName, {type:"image/png", lastModified:new Date().getTime()})
@@ -309,7 +326,7 @@ export default function ApplicantsPage(){
 
     async function deleteApplicant(event: any, applicant: string){
         event.preventDefault()
-        const res = await fetch(API_SERVER+`/api/applicant/delete/ref?id=${applicant}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/applicant/delete/ref?id=${applicant}&jobid=${jobId}`, {credentials: 'include'})
         if(!res.ok){
             setControlsApplicantReturn('Falha ao deletar candidato')
             return
@@ -327,42 +344,66 @@ export default function ApplicantsPage(){
             return
         }
 
-
-        console.log(await res.text())
         setControlsApplicantReturn('Candidato foi aprovado para a próxima etapa')
-        
+        getApplicants()
     }
 
     async function prevStepApplicant(event: any, applicant: string){
         event.preventDefault()
-        const res = await fetch(API_SERVER+`/api/applicant/prevstep?applicant=${applicant}&&job=${jobId}`, {credentials: 'include'})
+        const res = await fetch(API_SERVER+`/api/applicant/prevstep?applicant=${applicant}&job=${jobId}`, {credentials: 'include'})
         if(!res.ok){
             setControlsApplicantReturn('Não foi possível mover o candidato para a etapa anterior')
             return
         }
 
-
-        console.log(await res.text())
         setControlsApplicantReturn('Candidato voltou uma etapa')
-        
+        getApplicants()
     }
 
     async function addTag(event: any){
         event.preventDefault()
+        setTagLoading(InputTag.tag)
 
-        if(InputTag.tag.length > 0 && InputTag.tag.length <= 32 && InputTag.color.length == 7 && !Tags.find((tag) => tag.tag == InputTag.tag) && Tags.length <= 10 && await isHexColor(InputTag.color))
+        if(InputTag.tag.length > 0 && InputTag.tag.length <= 32 && InputTag.color.length == 7 && !Tags.find((tag) => tag.tag == InputTag.tag) && Tags.length <= 10 && await isHexColor(InputTag.color)){
+            const res = await fetch(API_SERVER+`/api/applicant/addtag?applicant=${ViwerFormData._id}&company=${companyid}&&tag=${encodeURIComponent(InputTag.tag)}&color=${encodeURIComponent(InputTag.color)}`, {credentials: 'include'})
+            if(!res.ok){
+                console.log("Falha ao adicionar tag")
+                setTagLoading('')
+                console.log(res.text)
+                return
+            }
             setTags(prevTags=>[...prevTags, InputTag])
+        }
 
+        setTagLoading('')
     }
 
     async function addTagFromDefaults(event: any, tag: string, color: string){ 
         event.preventDefault()
-        if(!Tags.find((cTag) => cTag.tag == tag) && Tags.length <= 10 && await isHexColor(color))
+        if(TagLoading === tag)
+            return
+
+        setTagLoading(tag)
+        if(!Tags.find((cTag) => cTag.tag == tag) && Tags.length <= 10 && await isHexColor(color)){
+            const res = await fetch(API_SERVER+`/api/applicant/addtag?applicant=${ViwerFormData._id}&company=${companyid}&tag=${encodeURIComponent(tag)}&color=${encodeURIComponent(color)}`, {credentials: 'include'})
+            if(!res.ok){
+                console.log("Falha ao adicionar tag")
+                setTagLoading('')
+                return
+            }
             setTags(prevTags=>[...prevTags, {tag: tag, color: color}])
+        }
+        setTagLoading('')
     }
 
     async function removeTag(event: any, tag: string){
         event.preventDefault()
+        const res = await fetch(API_SERVER+`/api/applicant/deltag?applicant=${encodeURIComponent(ViwerFormData._id)}&company=${companyid}&tag=${encodeURIComponent(tag)}`, {credentials: 'include'})
+        if(!res.ok){
+            console.log("Não foi possível remover a tag")
+            return
+        }
+
         setTags(prevTags=>prevTags.filter(ptag=> ptag.tag != tag))
     }
 
@@ -394,13 +435,22 @@ export default function ApplicantsPage(){
                     </div>
                     <label className='text-sm' htmlFor="company_name">Clique em uma tag abaixo para adicionar ao candidato ou crie a sua própria</label>
                     <div className='w-full flex flex-wrap gap-3 border-[1px] border-label-secondary/20 p-2 rounded-md justify-center'>
-                <button onClick={(event)=> addTagFromDefaults(event, 'Habilidoso(a)','#1aabc4')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-sky-600'>Habilidoso(a)</button>
+
+                <button onClick={(event)=> addTagFromDefaults(event, 'Qualificado','#269126')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#269126]'>{TagLoading == 'Qualificado' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Qualificado</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Experiente','#1aa1a1')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#1aa1a1]'>{TagLoading == 'Experiente' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Experiente</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Habilidoso','#FF00FF')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#FF00FF]'>{TagLoading == 'Habilidoso' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Habilidoso</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Destacado','#cccc23')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#cccc23]'>{TagLoading == 'Destacado' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Destacado</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Inovador','#FF4500')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#FF4500]'>{TagLoading == 'Inovador' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Inovador</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Confiável','#FF8C00')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#FF8C00]'>{TagLoading == 'Confiável' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Confiável</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Potencial','#26a384')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#26a384]'>{TagLoading == 'Potencial' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Potencial</button>
+                <button onClick={(event)=> addTagFromDefaults(event, 'Criativo ','#9400D3')} className='bg-gray-400 text-white w-fit p-2 rounded-full text-[11px] shadow shadow-black/50 hover:scale-110 hover:bg-[#9400D3]'>{TagLoading == 'Criativo' && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>} Criativo</button>
                     </div>
                     <div className='flex flex-row gap-3 w-full px-3 justify-center'>
                 <input onChange={handleTagInputs} className='w-[120px] sm:w-auto self-center border border-black/20 rounded-md p-2' type='text' name='tag' placeholder='Bom portfólio' value={InputTag.tag}></input>
                 <input onChange={handleTagInputs} className='w-[120px] sm:w-auto self-center border border-black/20 rounded-md p-2' type='text' name='color' placeholder='#000000' value={InputTag.color} ></input>
                     </div>
-                    <button onClick={(event)=>addTag(event)} className='bg-app-base-primary text-white rounded-sm w-fit self-center text-sm p-2'>Adicionar tag</button>
+                    <button onClick={(event)=>addTag(event)} className='bg-app-base-primary text-white rounded-sm w-fit self-center text-sm p-2'>{TagLoading && TagLoading == InputTag.tag && <i className="fa fa-circle-o-notch animate-spin" aria-hidden="true"></i>}
+Adicionar tag</button>
                     <label className='text-sm' htmlFor="company_name">Sobre mim</label>
                     <div className='w-full border-[1px] border-label-secondary/20 p-2 rounded-md'>
                         <p className='overflow-auto h-24'>{ViwerFormData.aboutme}</p>
@@ -581,7 +631,12 @@ export default function ApplicantsPage(){
   
     let textResponse: string = ''
     if(actionReturn == '200')
-        textResponse = '✔️ Novo candidato cadastrado'
+        if(ViwerFormData._id){
+            textResponse = '✔️ Edição realizada'
+            getApplicantRef(ViwerFormData._id)
+        }else{
+            textResponse = '✔️ Novo candidato cadastrado'
+        }
     else if(actionReturn){
         textResponse = '⚠️ ' + actionReturn 
     }
@@ -709,6 +764,11 @@ export default function ApplicantsPage(){
 
     function buildApplicantsElements(applicants: any){
         setApplicantsEl(applicants.map((applicant: any, index:any)=>{
+           const tagsEl = applicant.tags.map((tag:any)=>{
+            return (
+                <span style={{backgroundColor: `${tag.color}`}} className='py-1 px-2  font-normal rounded-full text-white md:text-base'>{tag.tag}</span>
+            )
+           }) 
            return (
                 <button key={index} onClick={(event)=>toggleViwerForm(event, applicant.applicant)} >
                 <li className="flex flex-row items-center border-b-2 py-5 self-center w-full sm:block hover:bg-active-primary/10">
@@ -717,7 +777,8 @@ export default function ApplicantsPage(){
                         <div className="w-full flex flex-col ml-3 font-Roboto text-left">
                             <h3 className="font-medium">{applicant.applicant_name}</h3>
                            <div className='flex flex-wrap gap-1 px-2 font-Roboto font-medium text-[10px] text-label-primary'>
-                                <span className='py-1 px-2 rounded-full bg-gray-400'># {applicant.step}ª Etapa</span>
+                                <span className='py-1 px-2 rounded-full bg-gray-400 text-white md:text-base'># {applicant.step}ª Etapa</span>
+                                {tagsEl}
                            </div>
                         </div>
                         <div className="flex flex-col justify-between">

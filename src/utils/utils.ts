@@ -1,5 +1,5 @@
 //export const API_SERVER = 'http://192.168.2.52:3500'
-export const API_SERVER = 'http://localhost:3500'
+export const API_SERVER = 'http://127.0.0.1:3500'
 
 export const isRecruiterAuthenticated = async()=>{	
 	const res = await fetch(API_SERVER+'/api/recruiter/auth', {credentials: 'include'})
@@ -10,6 +10,15 @@ export const isRecruiterAuthenticated = async()=>{
 	return false
 }
 
+export const getRecruiterName = async()=>{
+	const res = await fetch(API_SERVER + '/api/recruiter/name', {credentials: 'include'})
+	if(!res.ok){
+		return ''
+	}
+
+	const data = await res.json()	
+	return data?.name
+}
 export const isHexColor = async(input: string)=>{
   const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
 

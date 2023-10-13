@@ -5,6 +5,8 @@ import ImageUxNavIndicatorBullet from '../assets/images/mix/ux-nav-indicator-bul
 import ImageUxNavIndicatorBulletEmpty from '../assets/images/mix/ux-nav-indicator-bullet-empty.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight, faBars, faBriefcase, faCircleUser, faFlag, faHome, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { getRecruiterName } from '../utils/utils'
+import { useState } from 'react'
 
 export default function Header(){
     const currentPage = useLocation().pathname
@@ -12,6 +14,12 @@ export default function Header(){
     const company_id = searchparams.get('company')
     const jobid = searchparams.get('job')
     const step = searchparams.get('step')
+
+    const [recruiterName, setRecruiterName] = useState('')
+
+    getRecruiterName().then(name=>{
+        setRecruiterName(name)
+    })
 
     return(
         <>
@@ -36,9 +44,9 @@ export default function Header(){
         </header>
         <aside className='hidden overflow-hidden sm:block h-screen bg-gradient-to-b from-app-base-primary to-app-base-primary/60 text-white w-1/4 max-w-[250px] float-left'>
             <div className="p-4 flex flex-row items-center gap-2 w-full border-b-[1px] border-active-primary/20">
-                <img src={ImageGGprofile} alt="" className="" />
+                <img className="w-16 bg-white rounded-full p-5" src={ImageGGprofile} alt=""  />
                 <h1 className="font-Roboto font-normal text-base flex flex-col">
-                    Thalita Martins
+                   {recruiterName} 
                     <span className='text-xs'>Recrutador (a)</span>
                 </h1>
             </div>
@@ -83,7 +91,13 @@ export default function Header(){
                         Sair
                         <FontAwesomeIcon className='float-left text-sm' icon={faArrowRight} />
                     </Link>
-                
+                <div className='flex flex-col items-center mt-[2%]'>
+                    <div className='flex flex-row gap-3'>
+                       <Link target='blank' className='hover:scale-150' to={'https://github.com/iFuzzing'}><i className="fa fa-github" aria-hidden="true"></i></Link>  
+                       <Link target='blank' className='hover:scale-150' to={'https://www.linkedin.com/in/josivan-sousa-22091a253/'}><i className="fa fa-linkedin" aria-hidden="true"></i></Link> 
+                    </div>
+                    <span>iFuzzing</span>
+                </div>
             </div>
         </aside>
         </>
