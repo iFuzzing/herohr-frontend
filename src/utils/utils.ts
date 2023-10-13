@@ -1,5 +1,6 @@
 //export const API_SERVER = 'http://192.168.2.52:3500'
-export const API_SERVER = 'http://127.0.0.1:3500'
+//export const API_SERVER = 'http://127.0.0.1:3500'
+export const API_SERVER = 'https://api-herohr.onrender.com'
 
 export const isRecruiterAuthenticated = async()=>{	
 	const res = await fetch(API_SERVER+'/api/recruiter/auth', {credentials: 'include'})

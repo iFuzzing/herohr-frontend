@@ -48,7 +48,7 @@ export default function ContentPage(props:Props){
                 <FontAwesomeIcon icon={faAdd} />
             </button>
             } 
-        <span className="font-light text-xs text-gray-400 text-center">Projeto ainda em desenvolvimento</span>
+        <h5 className="font-light text-xs text-gray-400 text-center">Projeto ainda em desenvolvimento</h5>
         </main>
     )
 }

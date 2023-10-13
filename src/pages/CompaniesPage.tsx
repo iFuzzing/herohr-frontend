@@ -29,7 +29,7 @@ export async function action({request}:{request:Request}){
     const company_id: string = dataForm.company_id as string
 
     if(!name || !description || !image.name){
-        return 'Preencha todos os capos (não esqueça de selecionar uma imagem também)'
+        return 'Preencha todos os campos (não esqueça de selecionar uma imagem também)'
     }
 
     if(name.length > 42){
